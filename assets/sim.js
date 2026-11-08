@@ -209,10 +209,9 @@
       }
       const row = (cls, lab, html) => `<div class="row ${cls}"><span class="lab">${lab}</span><div>${html}</div></div>`;
       let body = "";
-      if (v.cz) body += row("r-cz", "Česká dvouhodinovka", `<h3>${esc(v.cz.t)}</h3>${v.cz.d ? `<p>${esc(v.cz.d)}</p>` : ""}${v.cz.teorie ? `<p class="teorie">Teorie: ${md(v.cz.teorie)}</p>` : ""}${v.cz.link ? `<p class="teorie"><a class="inl" href="${esc(v.cz.link[0])}" rel="noopener">${esc(v.cz.link[1])}</a></p>` : ""}`);
+      if (v.cz) body += row("r-cz", "Téma", `<h3>${esc(v.cz.t)}</h3>${v.cz.d ? `<p>${esc(v.cz.d)}</p>` : ""}${v.cz.teorie ? `<p class="teorie">Teorie: ${md(v.cz.teorie)}</p>` : ""}${v.cz.link ? `<p class="teorie"><a class="inl" href="${esc(v.cz.link[0])}" rel="noopener">${esc(v.cz.link[1])}</a></p>` : ""}`);
       if (v.sim) body += row("r-sim", "Simulace", `<h3>${esc(v.sim.t)}</h3>${v.sim.d ? `<p>${esc(v.sim.d)}</p>` : ""}`);
       if (v.denik) body += row("r-den", "Deník aktéra", `<p>${esc(H.denik[v.denik])}. ${esc(v.denikPozn || "Píše se v hodině.")}</p>`);
-      if (v.en) body += row("r-en", "Anglická hodina", `<p lang="en">${esc(v.en)}</p>`);
       (v.ukoly || []).forEach((u) => {
         body += row("r-ukol" + (u.volby ? " r-volby" : ""), u.volby ? "Volby" : u.strany ? "Úkol pro strany" : "Úkol",
           `<p>${esc(u.t)}</p><p class="termin">${u.konec ? `od ${esc(kdy(d(u.termin)))} do ${esc(kdy(d(u.konec)))}` : `do ${esc(kdy(d(u.termin)))}`}</p>`);
@@ -224,7 +223,7 @@
     <div class="wrap">
       <div class="page-head"><div>
         <h1>Harmonogram simulace</h1>
-        <p class="lead">Co se kdy probírá a co se v simulaci děje. Blok Demokracie a právní stát, česká dvouhodinovka a anglická hodina.</p>
+        <p class="lead">Co se kdy probírá a co se v simulaci děje. Blok Demokracie a právní stát.</p>
         ${osobni}
       </div></div>
       <div class="toolbar">

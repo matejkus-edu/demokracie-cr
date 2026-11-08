@@ -33,7 +33,7 @@
   /* Stránky: studijní jsou tady, simulační si zaregistruje sim.js do window.EXTRA_PAGES. */
   function pages() {
     return Object.assign({
-      mapa: { title: "Mapa moci", render: () => renderMapPage() },
+      mapa: { title: "Dělba moci", render: () => renderMapPage() },
       volby: { title: "Volby", render: () => renderVolby() },
       zakon: { title: "Cesta zákona", render: () => renderZakon() }
     }, window.EXTRA_PAGES || {});
@@ -73,7 +73,7 @@
   };
   window.addEventListener("hashchange", route);
 
-  /* ================= MAPA MOCI ================= */
+  /* ================= DĚLBA MOCI (schéma) ================= */
   const W = 1120;
   const NODE_TEXT = {
     parlament: { lines: ["Parlament ČR"] },
@@ -148,14 +148,14 @@
     <div class="wrap">
       <div class="page-head">
         <div>
-          <h1>Mapa moci</h1>
+          <h1>Dělba moci</h1>
           <p class="lead">Kdo v Česku jakou moc drží, jak se do funkce dostane a kdo ho může zastavit. Klikni na instituci nebo na šipku.</p>
         </div>
       </div>
-      <div class="toolbar" role="group" aria-label="Nastavení mapy">
+      <div class="toolbar" role="group" aria-label="Nastavení schématu">
         <div class="seg" id="seg-mode">
           <button type="button" data-mode="core">Jádro z hodiny</button>
-          <button type="button" data-mode="full">Celá mapa</button>
+          <button type="button" data-mode="full">Celé schéma</button>
         </div>
         <div class="kinds" id="kinds">
           ${Object.keys(KINDS).map((k) => `<button type="button" class="kind" data-kind="${k}" aria-pressed="true" title="${esc(KINDS[k].hint)}">${kindSample(k)}${esc(KINDS[k].name)}</button>`).join("")}
@@ -208,8 +208,8 @@
     else { holder.innerHTML = '<div class="map-box"></div>'; $(".map-box", holder).appendChild(buildSvg()); }
     $("#map-note").textContent = map.view === "schema"
       ? (map.mode === "core"
-        ? "Jádro z hodiny 4.4: šest ústavních institucí, občané a samospráva. Písmena A–H odpovídají klíči k mapě moci. Další instituce a vztahy ukáže Celá mapa."
-        : "Celá mapa: přibyly nezávislé instituce a další vztahy. Když je šipek moc, vyber si jednu instituci a zbytek se ztlumí.")
+        ? "Jádro z hodiny 4.4: šest ústavních institucí, občané a samospráva. Písmena A–H odpovídají klíči ze schématu z hodiny. Další instituce a vztahy ukáže Celé schéma."
+        : "Celé schéma: přibyly nezávislé instituce a další vztahy. Když je šipek moc, vyber si jednu instituci a zbytek se ztlumí.")
       : "";
     applySel();
     renderAside();
@@ -273,7 +273,7 @@
 
   function buildSvg() {
     const L = layout(map.mode);
-    const svg = el("svg", { viewBox: `0 0 ${W} ${L.H}`, class: "map " + map.mode, role: "group", "aria-label": "Mapa moci: ústavní instituce a jejich vztahy" });
+    const svg = el("svg", { viewBox: `0 0 ${W} ${L.H}`, class: "map " + map.mode, role: "group", "aria-label": "Dělba moci: ústavní instituce a jejich vztahy" });
     const defs = el("defs", {}, svg);
     for (const k of ["vznik", "spol", "brzda"]) {
       const m = el("marker", { id: "ar-" + k, viewBox: "0 0 14 12", refX: k === "brzda" ? 13 : 11, refY: 6, markerWidth: 14, markerHeight: 12, markerUnits: "userSpaceOnUse", orient: "auto" }, defs);
@@ -442,7 +442,7 @@
   function asideIdle() {
     const keys = [["A", "vznik", "volí"], ["B", "vznik", "jmenuje"], ["C", "spol", "navrhuje"], ["D", "brzda", "kontroluje (důvěra)"], ["E", "brzda", "rozpouští"], ["F", "brzda", "vrací zákon"], ["G", "spol", "souhlasí"], ["H", "brzda", "ruší zákony"]];
     return `<div class="how-read">
-      <h2>Jak číst mapu</h2>
+      <h2>Jak číst schéma</h2>
       <p>Barva rámečku říká, ke které moci instituce patří. Šipky ukazují tři druhy vztahů:</p>
       <ul class="rels">${Object.keys(KINDS).map((k) => `<li><div class="rel" style="cursor:default">${kindSample(k)}<span><b>${esc(KINDS[k].name)}</b><br><span style="color:var(--muted)">${esc(KINDS[k].hint)}</span></span></div></li>`).join("")}</ul>
       <p style="margin-top:12px">Brzdy končí kolmou čárkou: instituce na konci šipky může být zastavena.</p>
@@ -567,7 +567,7 @@
           <h3>Jak to probíhá</h3>
           <ul>${v.how.map((h) => `<li>${md(h)}</li>`).join("")}</ul>
           <div class="result"><p>${md(v.result)}</p></div>
-          ${v.inst ? `<p style="margin-top:16px">${md("[[" + v.inst + "|Ukázat na mapě moci]]")}</p>` : ""}
+          ${v.inst ? `<p style="margin-top:16px">${md("[[" + v.inst + "|Ukázat ve schématu dělby moci]]")}</p>` : ""}
           ${v.system === "poměrný" ? `<p>${md("[[volby/" + v.id + "|Vyzkoušet přepočet hlasů]]").replace('href="#volby-' + v.id + '"', 'href="#volby-' + v.id + '" data-jump="1"')}</p>` : ""}
         </div>
       </div>`;

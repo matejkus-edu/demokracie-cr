@@ -1,5 +1,5 @@
 /* Instituce, vztahy a pojistky. Stav k 8. 11. 2026.
-   Odkazy v textech: [[ps|Sněmovna]] vede na instituci v mapě,
+   Odkazy v textech: [[ps|Sněmovna]] vede na instituci ve schématu dělby moci,
    [[volby/ps|volby do Sněmovny]] na stránku webu, [[zakon|cesta zákona]] na cestu zákona. */
 
 window.STAV = "8. 11. 2026";
@@ -393,7 +393,7 @@ window.KINDS = {
   spol:  { name: "Kdo s kým musí spolupracovat", hint: "navrhuje, souhlasí, spolupodepisuje" }
 };
 
-/* Vztahy. key = písmeno šipky z mapy moci z hodiny 4.4 (A–H). core = patří do jádra z hodiny. */
+/* Vztahy. key = písmeno šipky ze schématu dělby moci z hodiny 4.4 (A–H). core = patří do jádra z hodiny. */
 window.EDGES = [
   // A volí
   { id: "volba-ps", from: "obcane", to: "ps", kind: "vznik", verb: "volí", key: "A", core: true,
@@ -443,7 +443,7 @@ window.EDGES = [
     text: "Ústavní soud ruší zákony nebo jejich části, které odporují Ústavě. Jeho nález nikdo nepřehlasuje.", ref: "čl. 87",
     via: [[960, 88], [260, 88]] },
 
-  // ---- celá mapa ----
+  // ---- celé schéma ----
   { id: "prehl-veto", from: "ps", to: "prezident", kind: "brzda", verb: "přehlasuje veto",
     text: "Když prezident zákon vrátí, Sněmovna ho přehlasuje, pokud pro něj znovu hlasuje aspoň 101 poslanců.", ref: "čl. 50", link: "zakon" },
   { id: "prehl-senat", from: "ps", to: "senat", kind: "brzda", verb: "přehlasuje",
