@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Politický systém ČR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Interaktivní mapa moci, volby a cesta zákona v České republice. Studijní web pro Global Citizenship (H-GLC), blok Demokracie a právní stát.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Merriweather+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='5' width='7' height='18' rx='2' fill='%231E4F9C'/%3E%3Crect x='12.5' y='5' width='7' height='18' rx='2' fill='%23B0262C'/%3E%3Crect x='22' y='5' width='7' height='18' rx='2' fill='%234B3D80'/%3E%3Crect x='3' y='25' width='26' height='4' rx='2' fill='%23172133'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Přeskočit na obsah</a>
+<header class="site">
+  <div class="site-in">
+    <a class="brand" href="#mapa">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="5" width="7" height="18" rx="2" class="m-leg"/><rect x="12.5" y="5" width="7" height="18" rx="2" class="m-exec"/><rect x="22" y="5" width="7" height="18" rx="2" class="m-jud"/><rect x="3" y="25" width="26" height="4" rx="2" class="m-people"/></svg>
+      <span class="brand-t">Politický systém ČR</span>
+    </a>
+    <nav class="tabs" aria-label="Hlavní navigace">
+      <a href="#mapa" data-page="mapa">Mapa moci</a>
+      <a href="#volby" data-page="volby">Volby</a>
+      <a href="#zakon" data-page="zakon">Cesta zákona</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" tabindex="-1"></main>
+
+<footer class="site-foot">
+  <div class="foot-in">
+    <p>Studijní podklad pro Global Citizenship (H-GLC), třídy L1B a L1C, blok Demokracie a právní stát. Stav k <span data-stav></span>.</p>
+    <p>Vychází z Ústavy ČR a platných volebních zákonů. Plné znění Ústavy najdeš na <a href="https://www.psp.cz/docs/laws/constitution.html" rel="noopener">psp.cz</a>, výsledky voleb na <a href="https://www.volby.cz" rel="noopener">volby.cz</a>.</p>
+  </div>
+</footer>
+
+<script src="assets/data-instituce.js"></script>
+<script src="assets/data-volby.js"></script>
+<script src="assets/data-zakon.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
