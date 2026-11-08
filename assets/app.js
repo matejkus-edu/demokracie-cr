@@ -30,26 +30,35 @@
   let current = null;
 
   /* Adresy: #mapa, #mapa-ps, #vztah-rozpust, #volby, #volby-senat, #zakon */
+  /* Stránky: studijní jsou tady, simulační si zaregistruje sim.js do window.EXTRA_PAGES. */
+  function pages() {
+    return Object.assign({
+      mapa: { title: "Mapa moci", render: () => renderMapPage() },
+      volby: { title: "Volby", render: () => renderVolby() },
+      zakon: { title: "Cesta zákona", render: () => renderZakon() }
+    }, window.EXTRA_PAGES || {});
+  }
+
   function parse() {
     const h = (location.hash || "").replace(/^#\/?/, "");
     if (!h) return { page: "mapa" };
     if (h.startsWith("vztah-")) return { page: "mapa", a: "vztah", b: h.slice(6) };
-    const m = h.match(/^(mapa|volby|zakon)(?:-(.+))?$/);
-    if (!m) return null;
+    const m = h.match(/^([a-z]+)(?:-(.+))?$/);
+    if (!m || !pages()[m[1]]) return null;
     return { page: m[1], a: m[2] || null };
   }
 
   function route() {
     const r = parse();
     if (!r) { if (!current) { location.replace("#mapa"); } return; }
-    const page = r.page;
+    const page = r.page, P = pages()[page];
     $$(".tabs a").forEach((a) => a.setAttribute("aria-current", a.dataset.page === page ? "page" : "false"));
     if (current !== page) {
       current = page;
-      document.title = { mapa: "Mapa moci", volby: "Volby", zakon: "Cesta zákona" }[page] + " | Politický systém ČR";
-      ({ mapa: renderMapPage, volby: renderVolby, zakon: renderZakon })[page]();
+      document.title = P.title + " | Politický systém ČR";
+      P.render(r.a);
       window.scrollTo(0, 0);
-    }
+    } else if (P.update) P.update(r.a);
     if (page === "mapa") {
       if (r.a === "vztah" && r.b) selectMap({ type: "edge", id: r.b });
       else if (r.a && INST[r.a]) selectMap({ type: "node", id: r.a });
@@ -57,6 +66,11 @@
     }
     if (page === "volby") showVolba(r.a);
   }
+  window.APP = {
+    $, $$, esc, md, store, main,
+    rerender() { current = null; route(); },
+    currentPage: () => current
+  };
   window.addEventListener("hashchange", route);
 
   /* ================= MAPA MOCI ================= */
@@ -796,5 +810,5 @@
       <div class="box"><h3>Skutečné zákony</h3><p>Každý návrh zákona dostane číslo sněmovního tisku. Jeho cestu krok za krokem najdeš na <a href="https://www.psp.cz/sqw/tisky.sqw" rel="noopener">psp.cz</a>.</p></div>`;
   }
 
-  route();
+  document.addEventListener("DOMContentLoaded", route);
 })();
