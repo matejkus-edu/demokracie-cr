@@ -52,7 +52,7 @@
     const r = parse();
     if (!r) { if (!current) { location.replace("#mapa"); } return; }
     const page = r.page, P = pages()[page];
-    $$(".tabs a").forEach((a) => a.setAttribute("aria-current", a.dataset.page === page ? "page" : "false"));
+    $$(".tabs a").forEach((a) => a.setAttribute("aria-current", (a.dataset.pages || a.dataset.page).split(" ").includes(page) ? "page" : "false"));
     if (current !== page) {
       current = page;
       document.title = P.title + " | Politický systém ČR";

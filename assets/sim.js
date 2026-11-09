@@ -3,7 +3,6 @@
 (function () {
   "use strict";
 
-  const ROLE = ["Lídr(ka)", "Programový expert", "Volební manažer", "Mluvčí", "Analytik"];
   const TRIDY = ["L1B", "L1C"];
   const DNY = ["ne", "po", "út", "st", "čt", "pá", "so"];
 
@@ -11,7 +10,7 @@
   const esc = (s) => A().esc(s == null ? "" : s);
 
   /* ================= PŘIHLÁŠENÍ ================= */
-  const auth = { client: null, user: null, profil: null, ready: false, chyba: null };
+  const auth = { client: null, user: null, profil: null, ready: false, chyba: null, authPages: ["harmonogram", "ucet", "ucitel"] };
   window.SIM = auth;
 
   if (window.supabase && window.SUPABASE_URL) {
@@ -38,7 +37,7 @@
     const zmena = !auth.ready || predtim !== (auth.user ? auth.user.id : null);
     auth.ready = true;
     hlavicka();
-    if (zmena && ["harmonogram", "ucet", "ucitel"].includes(A().currentPage())) A().rerender();
+    if (zmena && auth.authPages.includes(A().currentPage())) A().rerender();
   }
 
   function hlavicka() {
@@ -100,7 +99,7 @@
           <p class="lead">${p.ucitel ? "Učitelský účet." : `Třída ${esc(p.trida)}. ${p.strany ? `Strana ${esc(p.strany.nazev)}${p.role_ve_strane ? `, role ${esc(p.role_ve_strane)}` : ""}.` : "Do strany tě učitel zařadí v hodině 23. 11."}`}</p>
         </div></div>
         <div class="card-form">
-          ${p.ucitel ? '<p><a class="btn" href="#ucitel">Otevřít učitelský panel</a></p>' : '<p><a class="btn" href="#harmonogram">Harmonogram simulace</a></p>'}
+          ${p.ucitel ? '<p><a class="btn" href="#ucitel">Otevřít učitelský panel</a></p>' : `<p class="btnrow"><a class="btn" href="#harmonogram">Harmonogram simulace</a>${p.strana_id ? '<a class="btn ghost" href="#strana">Profil naší strany</a>' : ""}</p>`}
           <p><button type="button" class="btn ghost" id="odhlasit">Odhlásit se</button></p>
           ${p.ucitel ? "" : '<p class="hint">Na školním počítači se po hodině vždy odhlas.</p>'}
         </div>
@@ -256,10 +255,12 @@
 
   async function nactiPanel() {
     const c = auth.client, T = panel.trida;
-    const [z, s] = await Promise.all([
+    const [z, s, n] = await Promise.all([
       c.from("zaci").select("id, jmeno, trida, strana_id, role_ve_strane, login, kody(kod)").eq("trida", T).eq("ucitel", false).order("login"),
-      c.from("strany").select("id, nazev, trida, poradi, created_at").eq("trida", T).order("poradi").order("created_at")
+      c.from("strany").select("id, nazev, trida, poradi, stav_uprav, created_at").eq("trida", T).order("poradi").order("created_at"),
+      c.from("nastaveni").select("uzaverka_stran").eq("id", 1).maybeSingle()
     ]);
+    panel.uzaverka = n.data ? n.data.uzaverka_stran : null;
     panel.zaci = (z.data || []).map((r) => Object.assign(r, { kod: Array.isArray(r.kody) ? (r.kody[0] || {}).kod : (r.kody || {}).kod }));
     panel.strany = s.data || [];
     panel.chyba = z.error ? z.error.message : s.error ? s.error.message : null;
@@ -290,7 +291,8 @@
     const main = A().main, T = panel.trida;
     const bezStrany = panel.zaci.filter((z) => !z.strana_id).length;
     const opts = (sel) => `<option value="">bez strany</option>` + panel.strany.map((s) => `<option value="${s.id}"${s.id === sel ? " selected" : ""}>${esc(s.nazev)}</option>`).join("");
-    const ropts = (sel) => `<option value="">bez role</option>` + ROLE.map((r) => `<option${r === sel ? " selected" : ""}>${esc(r)}</option>`).join("");
+    const sopts = (sel) => [["auto", "Upravují do uzávěrky"], ["zamceno", "Zamčeno"], ["odemceno", "Odemčeno i po uzávěrce"]].map((o) => `<option value="${o[0]}"${o[0] === sel ? " selected" : ""}>${o[1]}</option>`).join("");
+    const lokal = (iso) => { if (!iso) return ""; const d = new Date(iso); const p2 = (x) => String(x).padStart(2, "0"); return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}`; };
     main.innerHTML = `
     <div class="wrap">
       <div class="page-head"><div>
@@ -309,9 +311,12 @@
           <h2>Strany v ${T}</h2>
           <ul class="p-strany">${panel.strany.map((s) => `<li data-id="${s.id}">
             <input type="text" value="${esc(s.nazev)}" aria-label="Název strany" data-f="nazev">
-            <span class="cnt">${panel.zaci.filter((z) => z.strana_id === s.id).length}</span>
-            <button type="button" class="mini danger" data-del="${s.id}">Smazat</button></li>`).join("") || '<li class="empty">Zatím žádná strana. Strany vzniknou v hodině 23. 11., sem je pak přidáte.</li>'}</ul>
+            <span class="cnt" title="počet členů">${panel.zaci.filter((z) => z.strana_id === s.id).length}</span>
+            <a class="mini" href="#strany-${s.id}">Profil</a>
+            <button type="button" class="mini danger" data-del="${s.id}">Smazat</button>
+            <select class="stav-sel" data-stav="${s.id}" aria-label="Úpravy profilu">${sopts(s.stav_uprav)}</select></li>`).join("") || '<li class="empty">Zatím žádná strana. Strany vzniknou v hodině 23. 11., sem je pak přidáte. Název si strana může později změnit sama.</li>'}</ul>
           <form class="p-add" id="f-strana"><input id="nova-strana" type="text" placeholder="Název nové strany" aria-label="Název nové strany"><button type="submit" class="btn small">Přidat stranu</button></form>
+          <label class="uzaverka"><span>Uzávěrka profilů a kalkulačky (obě třídy)</span><input type="datetime-local" id="uzaverka" value="${lokal(panel.uzaverka)}"></label>
         </section>
 
         <section class="pbox">
@@ -326,12 +331,12 @@
       <section class="pbox wide">
         <div class="pbox-head"><h2>Žáci v ${T}</h2>${panel.zaci.length ? '<button type="button" class="btn small ghost" id="tisk">Vytisknout kódy</button>' : ""}</div>
         ${panel.zaci.length ? `<div class="tbl-wrap"><table class="p-zaci">
-          <thead><tr><th>Jméno</th><th>Kód</th><th>Strana</th><th>Role</th><th></th></tr></thead>
+          <thead><tr><th>Jméno</th><th>Kód</th><th>Strana</th><th>Role ve straně</th><th></th></tr></thead>
           <tbody>${panel.zaci.map((z) => `<tr data-id="${z.id}">
             <td>${esc(z.jmeno)}</td>
             <td><code>${esc(z.kod || "")}</code></td>
             <td><select data-f="strana_id" aria-label="Strana">${opts(z.strana_id)}</select></td>
-            <td><select data-f="role_ve_strane" aria-label="Role">${ropts(z.role_ve_strane)}</select></td>
+            <td class="role">${z.role_ve_strane ? esc(z.role_ve_strane) : '<span class="muted">určí strana</span>'}</td>
             <td class="acts"><button type="button" class="mini" data-kod="${z.id}">Nový kód</button><button type="button" class="mini danger" data-smaz="${z.id}">Smazat</button></td>
           </tr>`).join("")}</tbody></table></div>` : '<p class="hint">Zatím žádní žáci. Přidejte je seznamem jmen výše.</p>'}
       </section>
@@ -365,6 +370,16 @@
       const { error } = await c.from("strany").update({ nazev: inp.value.trim() }).eq("id", id);
       stav(error ? "Název se nepodařilo uložit: " + error.message : "Uloženo", !!error);
     }));
+    $$("[data-stav]").forEach((sel) => sel.addEventListener("change", async () => {
+      const { error } = await c.from("strany").update({ stav_uprav: sel.value }).eq("id", sel.dataset.stav);
+      stav(error ? "Nepodařilo se uložit: " + error.message : "Uloženo", !!error);
+    }));
+    const uz = document.getElementById("uzaverka");
+    if (uz) uz.addEventListener("change", async () => {
+      if (!uz.value) return;
+      const { error } = await c.from("nastaveni").update({ uzaverka_stran: new Date(uz.value).toISOString() }).eq("id", 1);
+      stav(error ? "Uzávěrku se nepodařilo uložit: " + error.message : "Uzávěrka uložena", !!error);
+    });
     $$("[data-del]").forEach((b) => b.addEventListener("click", () => dvaKroky(b, async () => {
       const { error } = await c.from("strany").delete().eq("id", b.dataset.del);
       if (error) return stav("Stranu se nepodařilo smazat: " + error.message, true);
