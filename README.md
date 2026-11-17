@@ -8,6 +8,7 @@ Studijní web pro Global Citizenship (H-GLC), třídy L1B a L1C, blok 4 Demokrac
 
 - **Harmonogram** (`#harmonogram`): týdny bloku 4 pro L1B a L1C: probírané téma, simulace, deník, úkoly a odkazy na teorii. Data v `assets/data-harmonogram.js`.
 - **Strany** (`#strany`, profil `#strany-<id>`): profily stran obou tříd a graf jejich pozic na dvou osách; vidí je jen přihlášení. Členové strany upravují profil v editoru `#strana` do uzávěrky (nastavuje se v panelu), vše se ukládá samo a učitel vidí historii úprav.
+- **Můj deník** (`#denik`, zápis `#denik-<číslo>`): deník aktéra. Každý zápis má vlastní otázky a pro každou třídu vlastní okno pro psaní; průběžně se ukládá. Učitel (`#deniky`) vidí, kdo odevzdal v hodině a kdo až po ní, čte zápisy včetně verze z konce hodiny, komentuje je a může jednotlivým žákům prodloužit psaní. Otázky a termíny upravuje v `#deniky-otazky`.
 - **Přihlášení** (`#ucet`) kódem z lístečku, učitel e-mailem a heslem. **Učitelský panel** (`#ucitel`): žáci, kódy, strany, tisk kódů.
 
 ## Simulace a databáze

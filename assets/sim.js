@@ -5,6 +5,7 @@
 
   const TRIDY = ["L1B", "L1C"];
   const DNY = ["ne", "po", "út", "st", "čt", "pá", "so"];
+  const ICO = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
 
   const A = () => window.APP;
   const esc = (s) => A().esc(s == null ? "" : s);
@@ -44,15 +45,23 @@
     const a = document.getElementById("acct");
     if (!a) return;
     if (auth.profil) {
-      a.textContent = auth.profil.ucitel ? "Učitelský panel" : auth.profil.jmeno.split(" ")[0];
+      a.innerHTML = (auth.profil.ucitel ? '<span class="lg">Učitelský panel</span><span class="sm">Panel</span>' : `<span class="nm">${esc(auth.profil.jmeno.split(" ")[0])}</span>`) + ICO;
+      a.setAttribute("aria-label", auth.profil.ucitel ? "Učitelský panel" : "Účet: " + auth.profil.jmeno);
       a.href = auth.profil.ucitel ? "#ucitel" : "#ucet";
       a.dataset.page = auth.profil.ucitel ? "ucitel" : "ucet";
       a.classList.add("in");
     } else {
-      a.textContent = window.innerWidth < 720 ? "Přihlásit" : "Přihlásit se";
+      a.innerHTML = '<span class="lg">Přihlásit se</span><span class="sm">Přihlásit</span>' + ICO;
+      a.setAttribute("aria-label", "Přihlásit se");
       a.href = "#ucet";
       a.dataset.page = "ucet";
       a.classList.remove("in");
+    }
+    const dt = document.querySelector('.tabs a[data-page="denik"]');
+    if (dt) {
+      const uc = !!(auth.profil && auth.profil.ucitel);
+      dt.href = uc ? "#deniky" : "#denik";
+      dt.querySelector(".lg").textContent = uc ? "Deníky" : "Můj deník";
     }
     const cur = A().currentPage();
     a.setAttribute("aria-current", a.dataset.page === cur ? "page" : "false");
@@ -210,7 +219,7 @@
       let body = "";
       if (v.cz) body += row("r-cz", "Téma", `<h3>${esc(v.cz.t)}</h3>${v.cz.d ? `<p>${esc(v.cz.d)}</p>` : ""}${v.cz.teorie ? `<p class="teorie">Teorie: ${md(v.cz.teorie)}</p>` : ""}${v.cz.link ? `<p class="teorie"><a class="inl" href="${esc(v.cz.link[0])}" rel="noopener">${esc(v.cz.link[1])}</a></p>` : ""}`);
       if (v.sim) body += row("r-sim", "Simulace", `<h3>${esc(v.sim.t)}</h3>${v.sim.d ? `<p>${esc(v.sim.d)}</p>` : ""}`);
-      if (v.denik) body += row("r-den", "Deník aktéra", `<p>${esc(H.denik[v.denik])}. ${esc(v.denikPozn || "Píše se v hodině.")}</p>`);
+      if (v.denik) body += row("r-den", "Deník aktéra", `<p>${esc(H.denik[v.denik])}. ${esc(v.denikPozn || "Píše se v hodině.")}</p><p class="teorie"><a class="inl" href="#denik-${v.denik}">Otevřít v deníku</a></p>`);
       (v.ukoly || []).forEach((u) => {
         body += row("r-ukol" + (u.volby ? " r-volby" : ""), u.volby ? "Volby" : u.strany ? "Úkol pro strany" : "Úkol",
           `<p>${esc(u.t)}</p><p class="termin">${u.konec ? `od ${esc(kdy(d(u.termin)))} do ${esc(kdy(d(u.konec)))}` : `do ${esc(kdy(d(u.termin)))}`}</p>`);
@@ -299,6 +308,11 @@
         <h1>Učitelský panel</h1>
         <p class="lead">Žáci, přihlašovací kódy a strany. Změny se ukládají hned.</p>
       </div></div>
+      <nav class="subnav" aria-label="Učitelský panel">
+        <a href="#ucitel" aria-current="page">Žáci a strany</a>
+        <a href="#deniky">Odevzdané deníky</a>
+        <a href="#deniky-otazky">Otázky a termíny</a>
+      </nav>
       <div class="toolbar">
         <div class="seg" id="p-trida">${TRIDY.map((t) => `<button type="button" data-t="${t}" aria-pressed="${t === T}">${t}</button>`).join("")}</div>
         <span class="tb-label">${panel.zaci.length} žáků, ${panel.strany.length} stran${bezStrany ? `, ${bezStrany} bez strany` : ""}</span>

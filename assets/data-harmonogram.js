@@ -23,7 +23,7 @@ window.HARMONOGRAM = {
     {
       od: "2026-11-23", do: "2026-11-27",
       cz: { t: "Opakování dělby moci a 4.5 Strany a ideologie", d: "Pět minut schéma dělby moci zpaměti, levice a pravice, druhá osa (liberální a konzervativní).", teorie: "[[mapa|Dělba moci]]" },
-      sim: { t: "E1 Zakládáme strany", d: "Pozice strany na dvou osách, 3 priority, vlajkový zákon a rozdělení rolí ve straně." },
+      sim: { t: "E1 Zakládáme strany", d: "Los kvadrantu a bod na dvou osách, 3 priority, vlajkový zákon a rozdělení rolí ve straně." },
       denik: 1,
       ukoly: [{ t: "Materiály strany: název, logo, slogan, kandidátní listina, odpovědi do volební kalkulačky, plakát a volitelně 60s spot", termin: "2026-11-29T23:59", strany: true }]
     },
@@ -53,12 +53,12 @@ window.HARMONOGRAM = {
     },
     {
       od: "2026-12-14", do: "2026-12-18",
-      cz: { t: "4.8 Dokončení simulace a shrnutí", d: "Senát, prezident, Ústavní soud. Srovnání simulace se skutečností.", teorie: "[[zakon|Cesta zákona]]" },
-      sim: { t: "E4 Senát a prezident, Ústavní soud", d: "Senátoři hlasují váženým hlasem, prezident podepíše, nebo vetuje, opozice se může obrátit na Ústavní soud." },
+      cz: { t: "4.8 Dokončení simulace a shrnutí", d: "Senát a prezident, srovnání simulace se skutečností a shrnutí systému ČR.", teorie: "[[zakon|Cesta zákona]]" },
+      sim: { t: "E4 Senát a prezident", d: "Senátoři hlasují váženým hlasem, prezident zákon podepíše, nebo vetuje. Případné veto Sněmovna může přehlasovat 101 hlasy." },
       denik: 4,
       L1C: {
-        cz: { t: "4.8 Dokončení simulace", d: "Dokončení 2. a 3. čtení, Senát a prezident, Ústavní soud ve zkrácené podobě.", teorie: "[[zakon|Cesta zákona]]" },
-        sim: { t: "E4 dokončení, Ústavní soud", d: "Zákon projde Sněmovnou, Senátem a k prezidentovi." }
+        cz: { t: "4.8 Dokončení simulace", d: "Dokončení 2. a 3. čtení, Senát a prezident, srovnání se skutečností.", teorie: "[[zakon|Cesta zákona]]" },
+        sim: { t: "E4 dokončení", d: "Zákon projde Sněmovnou, Senátem a k prezidentovi." }
       }
     },
     { od: "2026-12-21", do: "2027-01-01", volno: "Vánoční prázdniny" }
