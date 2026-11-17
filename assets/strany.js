@@ -17,17 +17,23 @@
     zakon_naklady: "vlajkový zákon", zakon_pravomoc: "vlajkový zákon", zakon_typ: "vlajkový zákon", kandidatka: "kandidátní listina"
   };
 
-  const st = { strany: [], zaci: [], uzaverka: null, nacteno: 0 };
+  const st = { strany: [], zaci: [], uzaverka: null, nacteno: 0, odpovedi: [] };
+  function kalkHotovo(id) {
+    const o = st.odpovedi.filter((x) => x.strana_id === id);
+    return o.length >= 14 && o.every((x) => x.odpoved != null && (x.zduvodneni || "").trim()) && o.filter((x) => x.odpoved === 0).length <= 3;
+  }
 
   /* ---------- data ---------- */
   async function nacti() {
     const c = S().client;
-    const [s, z, n] = await Promise.all([
+    const [s, z, n, o] = await Promise.all([
       c.from("strany").select("id, trida, nazev, poradi, stav_uprav, created_at, profily_stran(*)").order("poradi").order("created_at"),
       c.from("zaci").select("id, jmeno, trida, strana_id, role_ve_strane").eq("ucitel", false).order("jmeno"),
-      c.from("nastaveni").select("uzaverka_stran").eq("id", 1).maybeSingle()
+      c.from("nastaveni").select("uzaverka_stran").eq("id", 1).maybeSingle(),
+      c.from("odpovedi_stran").select("strana_id, odpoved, zduvodneni")
     ]);
     if (s.error) throw new Error(s.error.message);
+    st.odpovedi = o.data || [];
     st.strany = (s.data || []).map((r) => Object.assign(r, { p: (Array.isArray(r.profily_stran) ? r.profily_stran[0] : r.profily_stran) || {} }));
     st.zaci = z.data || [];
     st.uzaverka = n.data ? new Date(n.data.uzaverka_stran) : null;
@@ -66,7 +72,8 @@
       ["3 priority", !!(p.p1 && p.p2 && p.p3)],
       ["Vlajkový zákon", !!(p.zakon_nazev && p.zakon_problem && p.zakon_reseni && p.zakon_koho && p.zakon_naklady && p.zakon_typ)],
       ["Kandidátní listina a role", cl.length > 0 && cl.every((c) => c.role) && ROLE.every((r) => role.has(r))],
-      ["Plakát", !!p.plakat_path]
+      ["Plakát", !!p.plakat_path],
+      ["Odpovědi do kalkulačky", kalkHotovo(s.id)]
     ];
   }
 
@@ -103,12 +110,13 @@
       <text class="kl" x="${c0}" y="${m - 5}" font-size="${fs}" text-anchor="middle">Konzervativní</text>
       <text class="kl" x="${c0}" y="${m + inner + fs + 3}" font-size="${fs}" text-anchor="middle">Liberální</text>`;
     const skup = {};
-    body.forEach((b) => { const k = b.x + "|" + b.y; (skup[k] = skup[k] || []).push(b); });
+    body.forEach((b) => { const k = b.x + "|" + b.y + "|" + (b.ring ? 1 : 0); (skup[k] = skup[k] || []).push(b); });
     let dots = "";
+    body.filter((b) => b.od).forEach((b) => { dots += `<line class="spoj" x1="${sx(b.od.x)}" y1="${sy(b.od.y)}" x2="${sx(b.x)}" y2="${sy(b.y)}" stroke="${esc(b.barva)}"/>`; });
     Object.values(skup).forEach((arr) => arr.forEach((b, i) => {
       const off = (i - (arr.length - 1) / 2) * (o.mini ? 0 : 20);
       const cx = sx(b.x) + off, cy = sy(b.y), r = o.mini ? 7 : 9;
-      const inner2 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${esc(b.barva)}" class="dot"/>` +
+      const inner2 = (b.ring ? `<circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="none" stroke="${esc(b.barva)}" stroke-width="3" class="ring"/>` : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${esc(b.barva)}" class="dot"/>`) +
         (b.label ? `<text class="dl" x="${cx}" y="${cy - r - 5 - (arr.length > 1 ? (i % 2) * 12 : 0)}" text-anchor="middle">${esc(b.label)}</text>` : "") +
         `<title>${esc(b.title || b.label || "")}</title>`;
       dots += b.href ? `<a href="${esc(b.href)}">${inner2}</a>` : `<g>${inner2}</g>`;
@@ -158,6 +166,7 @@
         <div><p class="mine-t">Tvoje strana: <b>${esc(moje.nazev)}</b></p><p class="mine-s">${esc(stavText(moje))}</p></div>
         <div class="mine-a">${muzeUpravovat(moje) ? '<a class="btn" href="#strana">Upravit profil strany</a>' : ""}<a class="btn ghost" href="#strany-${moje.id}">Zobrazit profil</a></div>
       </div>` : ""}
+      <p class="kalk-link"><a class="btn ghost" href="#kalkulacka">Volební kalkulačka</a></p>
       <div class="toolbar">
         <div class="seg" id="s-trida">${TRIDY.map((t) => `<button type="button" data-t="${t}" aria-pressed="${t === T}">Strany ${t}</button>`).join("")}</div>
         <span class="tb-label">${T === paralelni ? "Tyto strany volíš ty." : T === vlastni ? "Strany tvé třídy. Volí je paralelní třída." : ""}</span>
@@ -292,7 +301,7 @@
         <nav class="ed-nav" aria-label="Části profilu">
           <ul>${[["zaklad", "Název a logo"], ["osy", "Pozice na osách"], ["program", "3 priority"], ["zakon", "Vlajkový zákon"], ["kandidatka", "Kandidátní listina"], ["kampan", "Plakát a spot"]].map((x) => `<li><a href="#strana${jeUcitel() ? "-" + s.id : ""}" data-jump="${x[0]}">${x[1]}</a></li>`).join("")}</ul>
           <div class="ed-check"><p>Hotovo ${h.filter((x) => x[1]).length} ze ${h.length}</p><ul id="checklist">${checklist(h)}</ul>
-          <p class="hint">Odpovědi do volební kalkulačky přibudou samostatně.</p></div>
+          <p><a class="btn small ghost" href="#kalkulacka-strana">Odpovědi do kalkulačky</a></p></div>
         </nav>
         <div class="ed-forms">
           <section class="ed-sec" id="sec-zaklad"><h2>Název a logo</h2>
@@ -502,6 +511,8 @@
     if (s) kresliEditorZachovej(s);
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden) obnov(); });
+
+  window.KOMPAS = kompas;
 
   /* ================= REGISTRACE ================= */
   window.EXTRA_PAGES = Object.assign(window.EXTRA_PAGES || {}, {
