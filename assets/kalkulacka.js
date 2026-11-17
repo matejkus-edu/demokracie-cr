@@ -14,16 +14,17 @@
   const kdy = (x) => `${DNY[x.getDay()]} ${x.getDate()}. ${x.getMonth() + 1}. ${x.getHours()}:${String(x.getMinutes()).padStart(2, "0")}`;
 
   let tU = "L1B";
-  const k = { vyroky: [], strany: [], odpovedi: [], klic: [], uzaverka: null, odkryt: false, vyplneni: [], zaci: [] };
+  const k = { vyroky: [], strany: [], odpovedi: [], klic: [], uzaverky: {}, odkryt: false, vyplneni: [], zaci: [] };
 
   async function nacti(proUcitele) {
     const c = S().client;
     const q = [
       c.from("vyroky").select("*").order("cislo"),
-      c.from("strany").select("id, trida, nazev, poradi, stav_uprav, created_at, profily_stran(zkratka, barva, logo_path, osa_lp, osa_lk)").order("poradi").order("created_at"),
+      c.from("strany").select("id, trida, nazev, poradi, stav_kalk, created_at, profily_stran(zkratka, barva, logo_path, osa_lp, osa_lk)").order("poradi").order("created_at"),
       c.from("odpovedi_stran").select("*"),
-      c.from("nastaveni").select("uzaverka_stran, odkryt_body").eq("id", 1).maybeSingle(),
-      c.from("vyroky_klic").select("*")
+      c.from("nastaveni").select("odkryt_body").eq("id", 1).maybeSingle(),
+      c.from("vyroky_klic").select("*"),
+      c.from("tridy").select("id, kalk_uzaverka")
     ];
     if (proUcitele) q.push(c.from("kalk_vyplneni").select("*"), c.from("zaci").select("id, jmeno, trida").eq("ucitel", false).order("jmeno"));
     const r = await Promise.all(q);
@@ -31,21 +32,26 @@
     if (err) throw new Error(err.error.message);
     k.vyroky = r[0].data; k.odpovedi = r[2].data; k.klic = r[4].data || [];
     k.strany = r[1].data.map((s) => Object.assign(s, { p: (Array.isArray(s.profily_stran) ? s.profily_stran[0] : s.profily_stran) || {} }));
-    k.uzaverka = r[3].data ? new Date(r[3].data.uzaverka_stran) : null;
+    k.uzaverky = {};
+    (r[5].data || []).forEach((t) => { k.uzaverky[t.id] = t.kalk_uzaverka ? new Date(t.kalk_uzaverka) : null; });
     k.odkryt = !!(r[3].data && r[3].data.odkryt_body);
-    if (proUcitele) { k.vyplneni = r[5].data; k.zaci = r[6].data; }
+    if (proUcitele) { k.vyplneni = r[6].data; k.zaci = r[7].data; }
   }
 
   const jeUcitel = () => !!(S().profil && S().profil.ucitel);
-  const poUzaverce = () => !k.uzaverka || new Date() >= k.uzaverka;
+  /* Každá třída má vlastní uzávěrku odpovědí stran. Voličům se kalkulačka otevře,
+     když uplyne uzávěrka paralelní třídy (strany, které volí, mají odpovědi uzamčené). */
+  const uzTridy = (t) => k.uzaverky[t] || null;
+  const uzavreno = (t) => !!uzTridy(t) && new Date() >= uzTridy(t);
+  const paralelniK = (t) => TRIDY.find((x) => x !== t);
   const odpStrany = (id) => k.odpovedi.filter((x) => x.strana_id === id);
   const odp1 = (id, c) => k.odpovedi.find((x) => x.strana_id === id && x.cislo === c);
   function muzeUpravovat(s) {
     if (jeUcitel()) return true;
     if (!S().profil || S().profil.strana_id !== s.id) return false;
-    if (s.stav_uprav === "odemceno") return true;
-    if (s.stav_uprav === "zamceno") return false;
-    return !poUzaverce();
+    if (s.stav_kalk === "odemceno") return true;
+    if (s.stav_kalk === "zamceno") return false;
+    return !uzavreno(s.trida);
   }
 
   /* Bod strany podle klíče: průměr (odpověď × směr) zvlášť pro obě osy, převedeno na škálu −5 až +5 */
@@ -70,6 +76,8 @@
     };
   }
 
+  const lokal = (d) => { if (!d) return ""; const p2 = (x) => String(x).padStart(2, "0"); return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+
   function hlaska(nadpis, text) {
     A().main.innerHTML = `<div class="wrap narrow"><div class="page-head"><div><h1>${esc(nadpis)}</h1><p class="lead">${text}</p></div></div></div>`;
   }
@@ -84,8 +92,8 @@
     if (arg && arg.startsWith("strana-") && jeUcitel()) return editorStrany(arg.slice(7));
     if (arg === "volic") return volic();
     if (jeUcitel()) return ucitel();
-    // žák: před uzávěrkou odpovídá strana, po uzávěrce volí
-    if (!poUzaverce() && ja.strana_id) return editorStrany(ja.strana_id);
+    // žák: do uzávěrky své třídy odpovídá za stranu, pak volí
+    if (ja.strana_id && !uzavreno(ja.trida)) return editorStrany(ja.strana_id);
     return volic();
   }
 
@@ -98,7 +106,8 @@
     if (!s) return hlaska("Odpovědi strany", "Strana nenalezena.");
     const lze = muzeUpravovat(s), dis = lze ? "" : " disabled";
     const st = stats(id);
-    const termin = s.stav_uprav === "zamceno" ? "Odpovědi jsou uzamčené." : s.stav_uprav === "odemceno" ? "Učitel vám odpovědi odemkl i po uzávěrce." : k.uzaverka ? (poUzaverce() ? `Uzávěrka byla ${kdy(k.uzaverka)}, odpovědi jsou uzamčené.` : `Odpovědi můžete měnit do ${kdy(k.uzaverka)}.`) : "";
+    const uz = uzTridy(s.trida), par = paralelniK(s.trida);
+    const termin = s.stav_kalk === "zamceno" ? "Odpovědi jsou uzamčené." : s.stav_kalk === "odemceno" ? "Učitel vám odpovědi odemkl i po uzávěrce." : uz ? (uzavreno(s.trida) ? `Uzávěrka byla ${kdy(uz)}, odpovědi jsou uzamčené.` : `Odpovědi můžete měnit do ${kdy(uz)}. Pak se uzamknou a kalkulačka se otevře voličům z ${par}.`) : "Termín uzávěrky zatím učitel nestanovil.";
     A().main.innerHTML = `
     <div class="wrap">
       <p class="crumb"><a class="inl" href="${jeUcitel() ? "#kalkulacka" : "#strany"}">${jeUcitel() ? "Přehled kalkulačky" : "Strany"}</a></p>
@@ -110,7 +119,7 @@
         <p><b>Pravidla:</b> nejvýš 3 neutrální odpovědi. U výroků z vašich priorit a vlajkového zákona nesmí odpověď odporovat programu. U ostatních smíte taktizovat, ale odpověď musíte umět obhájit. Zdůvodnění (1–2 věty, co prosazujete) uvidí voliči. Nepište, na jaké straně os stojíte.</p>
       </div>
       <div class="kk-stats" id="kk-stats">${statsHtml(st)}</div>
-      ${!poUzaverce() || jeUcitel() ? "" : '<p class="hint">Voliči z paralelní třídy už kalkulačku vyplňují. <a class="inl" href="#kalkulacka-volic">Vyplnit kalkulačku jako volič</a></p>'}
+      ${!jeUcitel() && uzavreno(par) ? `<p class="hint">Strany z ${par} už mají odpovědi uzamčené, kalkulačku můžeš vyplnit i jako volič. <a class="inl" href="#kalkulacka-volic">Vyplnit kalkulačku</a></p>` : ""}
       <ol class="kk-list">${k.vyroky.map((v) => { const r = odp1(id, v.cislo) || {};
         return `<li class="kk-item" data-c="${v.cislo}">
           <div class="kk-top"><span class="kk-n">${v.cislo}</span><div><p class="kk-obl">${esc(v.oblast)}</p><h3>${esc(v.text)}</h3>
@@ -175,8 +184,10 @@
     const ja = S().profil;
     const paralelni = ja.trida ? TRIDY.find((t) => t !== ja.trida) : null;
     v.trida = jeUcitel() ? tU : (paralelni || "L1C");
-    if (!poUzaverce() && !jeUcitel()) {
-      return hlaska("Volební kalkulačka", `Kalkulačka se pro voliče otevře po uzávěrce odpovědí stran, ${esc(kdy(k.uzaverka))}. ${ja.strana_id ? 'Do té doby vyplňujete <a class="inl" href="#kalkulacka-strana">odpovědi vaší strany</a>.' : ""}`);
+    if (!jeUcitel() && !uzavreno(v.trida)) {
+      const uz = uzTridy(v.trida);
+      const vlastni = ja.strana_id && !uzavreno(ja.trida) ? ' Do té doby můžete doplňovat <a class="inl" href="#kalkulacka-strana">odpovědi vaší strany</a>.' : "";
+      return hlaska("Volební kalkulačka", `Kalkulačka se otevře, až strany z ${esc(v.trida)} uzavřou své odpovědi${uz ? `, ${esc(kdy(uz))}` : ""}.${vlastni}`);
     }
     nactiStav();
     v.strany = k.strany.filter((s) => s.trida === v.trida);
@@ -290,13 +301,18 @@
     <div class="wrap">
       <div class="page-head"><div>
         <h1>Volební kalkulačka</h1>
-        <p class="lead">Odpovědi stran, body stran podle klíče a kdo už kalkulačku vyplnil jako volič. ${k.uzaverka ? `Uzávěrka odpovědí ${esc(kdy(k.uzaverka))}, pak se kalkulačka otevře voličům.` : ""}</p>
+        <p class="lead">Odpovědi stran, body stran podle klíče a kdo už kalkulačku vyplnil jako volič. Každá třída má vlastní uzávěrku odpovědí. Až uplyne, kalkulačka se otevře voličům z paralelní třídy.</p>
       </div></div>
       <div class="toolbar">
         <div class="seg" id="kk-tr">${TRIDY.map((t) => `<button type="button" data-t="${t}" aria-pressed="${t === tU}">Strany ${t}</button>`).join("")}</div>
         <a class="btn small ghost" href="#kalkulacka-volic">Vyzkoušet jako volič</a>
         <label class="kk-odkryt"><input type="checkbox" id="kk-odkryt"${k.odkryt ? " checked" : ""}> Ukázat žákům body stran podle odpovědí (4.7)</label>
         <span class="p-stav" id="kk-stav" role="status"></span>
+      </div>
+      <div class="kk-uz">
+        <label class="uzaverka"><span>Uzávěrka odpovědí stran ${tU}</span><input type="datetime-local" id="kk-uz" value="${lokal(uzTridy(tU))}"></label>
+        <button type="button" class="btn small ghost" id="kk-uz-ted"${uzavreno(tU) ? " disabled" : ""}>Uzavřít odpovědi ${tU} teď</button>
+        <p class="kk-uz-stav">${uzTridy(tU) ? (uzavreno(tU) ? `<b>Uzavřeno</b> od ${esc(kdy(uzTridy(tU)))}. Voliči z ${paralelniK(tU)} kalkulačku vyplňují.` : `<b>Otevřeno</b> do ${esc(kdy(uzTridy(tU)))}. Voliči z ${paralelniK(tU)} ji zatím nevidí.`) : "Uzávěrka není nastavená, odpovědi jsou otevřené."}</p>
       </div>
       ${strany.length ? `<div class="tbl-wrap"><table class="kk-tab">
         <thead><tr><th>Výrok</th>${strany.map((s) => `<th style="--pc:${esc(s.p.barva)}"><a class="inl" href="#kalkulacka-strana-${s.id}">${esc(s.p.zkratka || s.nazev)}</a></th>`).join("")}</tr></thead>
@@ -308,6 +324,7 @@
           <tr><th>Neutrálních (nejvýš 3)</th>${strany.map((s) => { const st = stats(s.id); return `<td class="${st.neutralni > 3 ? "c-bad" : ""}">${st.neutralni}</td>`; }).join("")}</tr>
           <tr><th>Bod podle odpovědí (ekon., spol.)</th>${strany.map((s) => { const b = bodStrany(s.id); return `<td>${b ? `${b.x}, ${b.y}` : "–"}</td>`; }).join("")}</tr>
           <tr><th>Zvolená pozice</th>${strany.map((s) => `<td>${s.p.osa_lp != null ? `${s.p.osa_lp}, ${s.p.osa_lk}` : "–"}</td>`).join("")}</tr>
+          <tr><th>Úpravy odpovědí</th>${strany.map((s) => `<td><select class="kk-zamek" data-kalk="${s.id}" aria-label="Úpravy odpovědí: ${esc(s.nazev)}">${[["auto", "do uzávěrky"], ["zamceno", "zamčeno"], ["odemceno", "odemčeno"]].map((o) => `<option value="${o[0]}"${o[0] === (s.stav_kalk || "auto") ? " selected" : ""}>${o[1]}</option>`).join("")}</select></td>`).join("")}</tr>
         </tfoot></table></div>
         <p class="hint dn-legend">++ souhlas, + spíš souhlas, 0 neutrální, − spíš nesouhlas, −− nesouhlas. <i class="udot"></i> chybí zdůvodnění. Body jsou na stejné škále jako graf stran (−5 až +5).</p>
         <div class="kk-body"><figure class="kompas-box"><figcaption>Plná tečka: zvolená pozice, kroužek: bod podle odpovědí</figcaption>${kompasBodu(tU)}</figure></div>`
@@ -318,6 +335,24 @@
       </section>
     </div>`;
     A().main.querySelectorAll("#kk-tr button").forEach((b) => b.addEventListener("click", () => { tU = b.dataset.t; ucitel(); }));
+    const hlas = (t, chyba) => { const st = document.getElementById("kk-stav"); st.textContent = t; st.classList.toggle("err", !!chyba); };
+    async function ulozUz(d) {
+      const { data, error } = await S().client.from("tridy").update({ kalk_uzaverka: d.toISOString() }).eq("id", tU).select();
+      if (error || !data || !data.length) return hlas("Uzávěrku se nepodařilo uložit" + (error ? ": " + error.message : ""), true);
+      k.uzaverky[tU] = d; ucitel(); hlas("Uzávěrka uložena");
+    }
+    document.getElementById("kk-uz").addEventListener("change", (e) => { if (e.target.value) ulozUz(new Date(e.target.value)); });
+    const ted = document.getElementById("kk-uz-ted");
+    ted.addEventListener("click", () => {
+      if (ted.dataset.potvrd) return ulozUz(new Date());
+      ted.dataset.potvrd = "1"; ted.textContent = "Opravdu uzavřít? Klikněte znovu";
+      setTimeout(() => { if (document.body.contains(ted)) { delete ted.dataset.potvrd; ted.textContent = `Uzavřít odpovědi ${tU} teď`; } }, 4000);
+    });
+    A().main.querySelectorAll("[data-kalk]").forEach((sel) => sel.addEventListener("change", async () => {
+      const { error } = await S().client.from("strany").update({ stav_kalk: sel.value }).eq("id", sel.dataset.kalk);
+      if (!error) { const s = k.strany.find((x) => x.id === sel.dataset.kalk); if (s) s.stav_kalk = sel.value; }
+      hlas(error ? "Nepodařilo se uložit: " + error.message : "Uloženo", !!error);
+    }));
     document.getElementById("kk-odkryt").addEventListener("change", async (e) => {
       const { error } = await S().client.from("nastaveni").update({ odkryt_body: e.target.checked }).eq("id", 1);
       const st = document.getElementById("kk-stav");

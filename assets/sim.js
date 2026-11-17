@@ -330,7 +330,7 @@
             <button type="button" class="mini danger" data-del="${s.id}">Smazat</button>
             <select class="stav-sel" data-stav="${s.id}" aria-label="Úpravy profilu">${sopts(s.stav_uprav)}</select></li>`).join("") || '<li class="empty">Zatím žádná strana. Strany vzniknou v hodině 23. 11., sem je pak přidáte. Název si strana může později změnit sama.</li>'}</ul>
           <form class="p-add" id="f-strana"><input id="nova-strana" type="text" placeholder="Název nové strany" aria-label="Název nové strany"><button type="submit" class="btn small">Přidat stranu</button></form>
-          <label class="uzaverka"><span>Uzávěrka profilů a kalkulačky (obě třídy)</span><input type="datetime-local" id="uzaverka" value="${lokal(panel.uzaverka)}"></label>
+          <label class="uzaverka"><span>Uzávěrka profilů stran (obě třídy)</span><input type="datetime-local" id="uzaverka" value="${lokal(panel.uzaverka)}"></label>
         </section>
 
         <section class="pbox">
