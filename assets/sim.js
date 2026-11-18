@@ -41,6 +41,15 @@
     if (zmena && auth.authPages.includes(A().currentPage())) A().rerender();
   }
 
+  // tlačítko „Odhlásit se“ kdekoli na stránce (učitelský panel, deníky)
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-odhlasit]");
+    if (!b) return;
+    b.disabled = true;
+    await auth.client.auth.signOut();
+    location.hash = "#ucet";
+  });
+
   function hlavicka() {
     const a = document.getElementById("acct");
     if (!a) return;
@@ -362,6 +371,7 @@
         <a href="#ucitel" aria-current="page">Žáci a strany</a>
         <a href="#deniky">Odevzdané deníky</a>
         <a href="#deniky-otazky">Otázky a termíny</a>
+        <button type="button" class="subnav-out" data-odhlasit>Odhlásit se</button>
       </nav>
       <div class="toolbar">
         <div class="seg" id="p-trida">${TRIDY.map((t) => `<button type="button" data-t="${t}" aria-pressed="${t === T}">${t}</button>`).join("")}</div>

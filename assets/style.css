@@ -642,6 +642,8 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .subnav a { text-decoration: none; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .subnav a:hover { color: var(--ink); }
 .subnav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+.subnav-out { margin-left: auto; align-self: center; font: inherit; font-size: 13.5px; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.subnav-out:hover { color: var(--ink); border-color: var(--ink); }
 .pill { display: inline-block; font-family: var(--sans); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 9px; line-height: 1.5; }
 .pill.open { background: var(--leg-bg); color: var(--leg); }
 .pill.done { background: var(--ok-bg); color: var(--ok); }
