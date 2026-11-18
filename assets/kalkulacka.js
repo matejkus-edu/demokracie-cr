@@ -20,7 +20,7 @@
     const c = S().client;
     const q = [
       c.from("vyroky").select("*").order("cislo"),
-      c.from("strany").select("id, trida, nazev, poradi, stav_kalk, created_at, profily_stran(zkratka, barva, logo_path, osa_lp, osa_lk)").order("poradi").order("created_at"),
+      c.from("strany").select("id, trida, nazev, poradi, stav_kalk, created_at, profily_stran(zkratka, barva, logo_path), pozice_stran(osa_lp, osa_lk)").order("poradi").order("created_at"),
       c.from("odpovedi_stran").select("*"),
       c.from("nastaveni").select("odkryt_body").eq("id", 1).maybeSingle(),
       c.from("vyroky_klic").select("*"),
@@ -31,7 +31,8 @@
     const err = r.find((x) => x.error);
     if (err) throw new Error(err.error.message);
     k.vyroky = r[0].data; k.odpovedi = r[2].data; k.klic = r[4].data || [];
-    k.strany = r[1].data.map((s) => Object.assign(s, { p: (Array.isArray(s.profily_stran) ? s.profily_stran[0] : s.profily_stran) || {} }));
+    const jeden = (x) => (Array.isArray(x) ? x[0] : x) || {};
+    k.strany = r[1].data.map((s) => Object.assign(s, { p: Object.assign({}, jeden(s.profily_stran), jeden(s.pozice_stran)) }));
     k.uzaverky = {};
     (r[5].data || []).forEach((t) => { k.uzaverky[t.id] = t.kalk_uzaverka ? new Date(t.kalk_uzaverka) : null; });
     k.odkryt = !!(r[3].data && r[3].data.odkryt_body);

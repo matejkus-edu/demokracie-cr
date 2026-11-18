@@ -12,12 +12,33 @@
   const POLE = {
     nazev: "název", zkratka: "zkratka", slogan: "slogan", barva: "barva", logo_path: "logo", plakat_path: "plakát", spot_url: "spot",
     osa_lp: "pozice na osách", osa_lk: "pozice na osách", osy_zduvodneni: "zdůvodnění pozice",
-    p1: "priorita 1", p1_popis: "priorita 1", p2: "priorita 2", p2_popis: "priorita 2", p3: "priorita 3", p3_popis: "priorita 3",
+    p1: "priorita 1", p1_popis: "priorita 1", p1_karta: "priorita 1", p1_smer: "priorita 1", p1_proc: "priorita 1",
+    p2: "priorita 2", p2_popis: "priorita 2", p2_karta: "priorita 2", p2_smer: "priorita 2", p2_proc: "priorita 2",
+    p3: "priorita 3", p3_popis: "priorita 3", p3_karta: "priorita 3", p3_smer: "priorita 3", p3_proc: "priorita 3",
     zakon_nazev: "vlajkový zákon", zakon_problem: "vlajkový zákon", zakon_reseni: "vlajkový zákon", zakon_koho: "vlajkový zákon",
     zakon_naklady: "vlajkový zákon", zakon_pravomoc: "vlajkový zákon", zakon_typ: "vlajkový zákon", kandidatka: "kandidátní listina"
   };
 
-  const st = { strany: [], zaci: [], uzaverka: null, nacteno: 0, odpovedi: [] };
+  /* Karty problémů (stejná čísla jako výroky kalkulačky). Každá priorita z jiné oblasti. */
+  const KARTY = [
+    [1, "Mobily ve škole", "Škola a vzdělávání"], [2, "Kdo zaplatí vysokou školu", "Škola a vzdělávání"], [4, "Volba předmětů", "Škola a vzdělávání"],
+    [3, "Děti na sociálních sítích", "Digitální svět"],
+    [5, "Z čeho má stát brát peníze", "Práce a daně"], [6, "Práce přes aplikace", "Práce a daně"],
+    [7, "Bydlení mladých", "Bydlení a doprava"], [8, "Doprava pro studenty", "Bydlení a doprava"],
+    [9, "Drahé energie", "Energie a klima"], [10, "Konec uhlí", "Energie a klima"],
+    [11, "Kamery s rozpoznáváním obličeje", "Bezpečnost"], [12, "Branná příprava", "Bezpečnost"],
+    [13, "Volební věk", "Demokracie"], [14, "Celostátní referendum", "Demokracie"]
+  ];
+  const karta1 = (n) => KARTY.find((x) => x[0] === n) || null;
+  /* Pozice na osách a zdůvodnění priorit jsou v tabulce pozice_stran: voliči z paralelní třídy je
+     nevidí, dokud učitel neodkryje body (4.7). */
+  const POZ = ["osa_lp", "osa_lk", "osy_zduvodneni", "p1_proc", "p2_proc", "p3_proc"];
+  function oblastiPriorit(p) {
+    const ob = [1, 2, 3].map((i) => p["p" + i + "_karta"]).filter(Boolean).map((n) => (karta1(n) || [])[2]);
+    return { pocet: ob.length, ruzne: new Set(ob).size === ob.length };
+  }
+
+  const st = { strany: [], zaci: [], uzaverka: null, odkryt: false, nacteno: 0, odpovedi: [] };
   function kalkHotovo(id) {
     const o = st.odpovedi.filter((x) => x.strana_id === id);
     return o.length >= 14 && o.every((x) => x.odpoved != null && (x.zduvodneni || "").trim()) && o.filter((x) => x.odpoved === 0).length <= 3;
@@ -27,16 +48,21 @@
   async function nacti() {
     const c = S().client;
     const [s, z, n, o] = await Promise.all([
-      c.from("strany").select("id, trida, nazev, poradi, stav_uprav, created_at, profily_stran(*)").order("poradi").order("created_at"),
+      c.from("strany").select("id, trida, nazev, poradi, stav_uprav, created_at, profily_stran(*), pozice_stran(*)").order("poradi").order("created_at"),
       c.from("zaci").select("id, jmeno, trida, strana_id, role_ve_strane").eq("ucitel", false).order("jmeno"),
-      c.from("nastaveni").select("uzaverka_stran").eq("id", 1).maybeSingle(),
+      c.from("nastaveni").select("uzaverka_stran, odkryt_body").eq("id", 1).maybeSingle(),
       c.from("odpovedi_stran").select("strana_id, odpoved, zduvodneni")
     ]);
     if (s.error) throw new Error(s.error.message);
     st.odpovedi = o.data || [];
-    st.strany = (s.data || []).map((r) => Object.assign(r, { p: (Array.isArray(r.profily_stran) ? r.profily_stran[0] : r.profily_stran) || {} }));
+    const jeden = (x) => (Array.isArray(x) ? x[0] : x) || null;
+    st.strany = (s.data || []).map((r) => {
+      const poz = jeden(r.pozice_stran);
+      return Object.assign(r, { p: Object.assign({}, jeden(r.profily_stran) || {}, poz || {}), pozVidet: !!poz });
+    });
     st.zaci = z.data || [];
     st.uzaverka = n.data ? new Date(n.data.uzaverka_stran) : null;
+    st.odkryt = !!(n.data && n.data.odkryt_body);
     st.nacteno = Date.now();
   }
 
@@ -69,7 +95,7 @@
       ["Název a slogan", !!(s.nazev && p.slogan)],
       ["Logo", !!p.logo_path],
       ["Pozice na osách", p.osa_lp != null && p.osa_lk != null && !!(p.osy_zduvodneni || "").trim()],
-      ["3 priority", !!(p.p1 && p.p2 && p.p3)],
+      ["3 priority", [1, 2, 3].every((i) => p["p" + i] && p["p" + i + "_karta"] && p["p" + i + "_smer"] && p["p" + i + "_popis"] && (p["p" + i + "_proc"] || "").trim()) && oblastiPriorit(p).ruzne],
       ["Vlajkový zákon", !!(p.zakon_nazev && p.zakon_problem && p.zakon_reseni && p.zakon_koho && p.zakon_naklady && p.zakon_typ)],
       ["Kandidátní listina a role", cl.length > 0 && cl.every((c) => c.role) && ROLE.every((r) => role.has(r))],
       ["Plakát", !!p.plakat_path],
@@ -154,6 +180,7 @@
     const strany = st.strany.filter((s) => s.trida === T);
     const moje = mojeStrana() ? najdi(mojeStrana()) : null;
     const pos = strany.filter((s) => s.p.osa_lp != null && s.p.osa_lk != null);
+    const skryte = strany.length && !strany.some((s) => s.pozVidet);
 
     A().main.innerHTML = `
     <div class="wrap">
@@ -172,13 +199,15 @@
         <span class="tb-label">${T === paralelni ? "Tyto strany volíš ty." : T === vlastni ? "Strany tvé třídy. Volí je paralelní třída." : ""}</span>
       </div>
       ${strany.length ? `
+      ${skryte ? `<div class="pcards">${strany.map(karta).join("")}</div>
+        <p class="hint skryto">Kde strany stojí na osách, voliči před volbami nevidí. Odhadni to z programu, vlajkového zákona, kampaně a z volební kalkulačky. Pozice se odkryjí po volbách.</p>` : `
       <div class="strany-grid">
         <div class="pcards">${strany.map(karta).join("")}</div>
         <figure class="kompas-box">
           ${kompas(pos.map((s) => ({ x: s.p.osa_lp, y: s.p.osa_lk, barva: s.p.barva, label: s.p.zkratka || s.nazev, title: s.nazev, href: "#strany-" + s.id })))}
-          <figcaption>${pos.length === strany.length ? "Pozice stran na dvou osách. Klikni na tečku pro profil strany." : `Pozice stran na dvou osách. ${strany.length - pos.length === 1 ? "Jedna strana" : `${strany.length - pos.length} strany`} zatím pozici nezadala.`}</figcaption>
+          <figcaption>${pos.length === strany.length ? "Pozice stran na dvou osách. Klikni na tečku pro profil strany." : `Pozice stran na dvou osách. ${strany.length - pos.length === 1 ? "Jedna strana" : `${strany.length - pos.length} strany`} zatím pozici nezadala.`}${!st.odkryt && !jeUcitel() ? " Voliči z paralelní třídy tenhle graf nevidí." : ""}</figcaption>
         </figure>
-      </div>` : `<div class="empty-state"><h2>Zatím tu nejsou žádné strany</h2><p>Strany vzniknou v hodině 23. 11. Pak se tu objeví jejich profily: program, vlajkový zákon, kandidátní listina a plakát.</p></div>`}
+      </div>`}` : `<div class="empty-state"><h2>Zatím tu nejsou žádné strany</h2><p>Strany vzniknou v hodině 23. 11. Pak se tu objeví jejich profily: program, vlajkový zákon, kandidátní listina a plakát.</p></div>`}
     </div>`;
     document.querySelectorAll("#s-trida button").forEach((b) => b.addEventListener("click", () => { tridaVyber = b.dataset.t; prehled(); }));
   }
@@ -199,7 +228,8 @@
     const p = s.p, cl = clenove(s);
     const prazdne = '<p class="muted">Strana zatím nevyplnila.</p>';
     const plakat = obrazek(p.plakat_path);
-    const pri = [1, 2, 3].map((i) => [p["p" + i], p["p" + i + "_popis"]]).filter((x) => x[0] || x[1]);
+    const pri = [1, 2, 3].map((i) => ({ t: p["p" + i], karta: karta1(p["p" + i + "_karta"]), smer: p["p" + i + "_smer"], popis: p["p" + i + "_popis"], proc: p["p" + i + "_proc"] }))
+      .filter((x) => x.t || x.smer || x.popis);
     const zakon = [["Jaký problém řeší", p.zakon_problem], ["Jak ho řeší", p.zakon_reseni], ["Koho se týká", p.zakon_koho], ["Kolik bude stát", p.zakon_naklady], ["Patří do pravomoci Parlamentu?", p.zakon_pravomoc]].filter((x) => x[1]);
     A().main.innerHTML = `
     <div class="wrap">
@@ -216,7 +246,9 @@
       <div class="pdetail">
         <div class="pd-main">
           <section class="pd-sec"><h2>Program</h2>
-            ${pri.length ? `<ol class="pd-pri">${pri.map((x) => `<li><h3>${esc(x[0] || "")}</h3>${x[1] ? `<p>${esc(x[1])}</p>` : ""}</li>`).join("")}</ol>` : prazdne}
+            ${pri.length ? `<ol class="pd-pri">${pri.map((x) => `<li>${x.karta ? `<p class="pri-karta">${esc(x.karta[2])}: ${esc(x.karta[1])}</p>` : ""}<h3>${esc(x.t || "")}</h3>
+              ${x.smer ? `<p><b>Řešení:</b> ${esc(x.smer)}</p>` : ""}${x.popis ? `<p><b>Konkrétně:</b> ${esc(x.popis)}</p>` : ""}
+              ${s.pozVidet && x.proc ? `<p class="pri-proc"><b>Proč to odpovídá pozici strany:</b> ${esc(x.proc)}</p>` : ""}</li>`).join("")}</ol>` : prazdne}
           </section>
           <section class="pd-sec zakon-card"><h2>Vlajkový zákon</h2>
             ${p.zakon_nazev || zakon.length ? `
@@ -225,7 +257,9 @@
               <dl class="facts">${zakon.map((x) => `<dt>${esc(x[0])}</dt><dd>${esc(x[1])}</dd>`).join("")}</dl>` : prazdne}
           </section>
           <section class="pd-sec"><h2>Kde strana stojí</h2>
-            ${p.osa_lp != null && p.osa_lk != null ? `<div class="pd-osy">${kompas([{ x: p.osa_lp, y: p.osa_lk, barva: p.barva }], { size: 240, mini: true })}
+            ${!s.pozVidet ? '<p class="muted">Pozici strany na osách voliči před volbami nevidí. Odhadni ji z programu, vlajkového zákona, kampaně a z volební kalkulačky. Odkryje se po volbách.</p>' : ""}
+            ${s.pozVidet && !st.odkryt && !jeUcitel() ? '<p class="hint">Tuto část a zdůvodnění priorit vidí jen vaše třída a učitel. Voliči z paralelní třídy je uvidí až po volbách.</p>' : ""}
+            ${!s.pozVidet ? "" : p.osa_lp != null && p.osa_lk != null ? `<div class="pd-osy">${kompas([{ x: p.osa_lp, y: p.osa_lk, barva: p.barva }], { size: 240, mini: true })}
               <div><p class="osy-cisla">${osaText(p.osa_lp, "levice", "pravice")}, ${osaText(p.osa_lk, "liberální", "konzervativní")}</p>${p.osy_zduvodneni ? `<p>${esc(p.osy_zduvodneni)}</p>` : ""}</div></div>` : prazdne}
           </section>
         </div>
@@ -291,7 +325,7 @@
       </div>`;
     A().main.innerHTML = `
     <div class="wrap">
-      <p class="crumb"><a class="inl" href="#strany-${s.id}">Zobrazit profil, jak ho uvidí voliči</a></p>
+      <p class="crumb"><a class="inl" href="#strany-${s.id}">Zobrazit profil strany</a></p>
       <div class="page-head"><div>
         <h1>${esc(s.nazev)}</h1>
         <p class="lead">${esc(stavText(s))} Vše se ukládá samo, můžete na profilu pracovat všichni najednou.</p>
@@ -312,6 +346,7 @@
           </section>
 
           <section class="ed-sec" id="sec-osy"><h2>Pozice na osách</h2>
+            <p class="hint skryto">Pozici a její zdůvodnění uvidí vaše třída a učitel. Voliči z paralelní třídy je před volbami neuvidí, odkryjí se až po volbách.</p>
             <div class="osy-grid"><div>
               ${slider("osa_lp", "Levice", "Pravice")}
               ${slider("osa_lk", "Liberální", "Konzervativní")}
@@ -320,8 +355,18 @@
           </section>
 
           <section class="ed-sec" id="sec-program"><h2>3 priority</h2>
-            <p class="hint">Priority musí sedět s vaší pozicí na osách.</p>
-            ${[1, 2, 3].map((i) => `<div class="pri-blk"><span class="pri-n">${i}</span><div>${inp("p" + i, "Priorita " + i, { max: 120 })}${inp("p" + i + "_popis", "Co konkrétně uděláte", { area: true, rows: 2, max: 600 })}</div></div>`).join("")}
+            <p class="hint">Každá priorita vychází z jedné karty problému a každá musí být z jiné oblasti. Přepište verzi schválenou v hodině.</p>
+            <p class="pri-warn" id="pri-warn" role="status">${oblastiPriorit(p).ruzne ? "" : "Dvě priority jsou ze stejné oblasti. Každá musí být z jiné."}</p>
+            ${[1, 2, 3].map((i) => `<div class="pri-blk"><span class="pri-n">${i}</span><div>
+              <div class="fld"><label for="f-p${i}_karta">Karta problému</label><select id="f-p${i}_karta" data-col="p${i}_karta"${dis}>
+                <option value="">Vyberte kartu…</option>
+                ${[...new Set(KARTY.map((k) => k[2]))].map((ob) => `<optgroup label="${esc(ob)}">${KARTY.filter((k) => k[2] === ob).map((k) => `<option value="${k[0]}"${p["p" + i + "_karta"] === k[0] ? " selected" : ""}>${k[0]}. ${esc(k[1])}</option>`).join("")}</optgroup>`).join("")}
+              </select></div>
+              ${inp("p" + i, "Název priority", { max: 120, hint: "Krátce, objeví se na kartě strany." })}
+              ${inp("p" + i + "_smer", "Zvolený směr z rozcestníku", { area: true, rows: 2, max: 600, hint: "Opište směr z karty, nebo napište vlastní." })}
+              ${inp("p" + i + "_popis", "Konkrétní opatření", { area: true, rows: 2, max: 600, hint: "Co přesně uděláte, kdo to zařídí a jak." })}
+              ${inp("p" + i + "_proc", "Proč to odpovídá pozici strany", { area: true, rows: 2, max: 600, hint: "Jedna věta. Voliči z paralelní třídy ji před volbami neuvidí." })}
+            </div></div>`).join("")}
           </section>
 
           <section class="ed-sec" id="sec-zakon"><h2>Vlajkový zákon</h2>
@@ -378,7 +423,7 @@
     savebar("Ukládám…");
     const res = col === "nazev"
       ? await c.from("strany").update({ nazev: String(val).trim() || s.nazev }).eq("id", s.id).select("id")
-      : await c.from("profily_stran").update({ [col]: val }).eq("strana_id", s.id).select("strana_id");
+      : await c.from(POZ.includes(col) ? "pozice_stran" : "profily_stran").update({ [col]: val }).eq("strana_id", s.id).select("strana_id");
     ed.pending--;
     if (res.error || !res.data || !res.data.length) {
       const zamek = !res.error && (!res.data || !res.data.length);
@@ -428,6 +473,13 @@
     });
 
     root.querySelectorAll("input[type=radio][data-col]").forEach((el) => el.addEventListener("change", () => ulozSloupec(s, el.dataset.col, el.value)));
+
+    root.querySelectorAll("select[data-col]").forEach((el) => el.addEventListener("change", async () => {
+      if (await ulozSloupec(s, el.dataset.col, el.value ? +el.value : null)) {
+        const w = document.getElementById("pri-warn");
+        if (w) w.textContent = oblastiPriorit(s.p).ruzne ? "" : "Dvě priority jsou ze stejné oblasti. Každá musí být z jiné.";
+      }
+    }));
 
     root.querySelectorAll(".sw[data-barva]").forEach((b) => b.addEventListener("click", async () => {
       if (await ulozSloupec(s, "barva", b.dataset.barva)) {
