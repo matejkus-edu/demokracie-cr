@@ -254,7 +254,7 @@
       return `<li class="hu ${u.kde === "doma" ? "hu-doma" : "hu-hodina"}${u.volby ? " hu-volby" : ""}${hotovo ? " hu-past" : ""}">
         <span class="hu-kde">${u.kde === "doma" ? (u.volitelne ? "Doma, volitelně" : "Doma") : "V hodině"}</span>
         <div class="hu-tx"><p>${esc(u.t)}${odkaz ? ` <a class="inl" href="${esc(odkaz[0])}">${esc(odkaz[1])}</a>` : ""}</p>
-          <p class="hu-meta"><span class="hu-kdy">${esc(kdyUkol(x))}</span>${u.vaha ? `<span class="hu-vaha" title="Váha ve skupinovém hodnocení strany (HV2)">${u.vaha} % hodnocení strany</span>` : ""}</p></div>
+          <p class="hu-meta"><span class="hu-kdy">${esc(kdyUkol(x))}</span>${u.vaha ? `<span class="hu-vaha" title="Váha ve skupinovém hodnocení strany (HV2)">${u.vaha} % hodnocení strany</span>` : ""}${u.vahaZak ? `<span class="hu-vaha" title="Váha v individuálním hodnocení žáka (HV2)">${u.vahaZak} % hodnocení žáka</span>` : ""}</p></div>
       </li>`;
     };
 
