@@ -598,6 +598,12 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .pd-pri li p + p { margin-top: 4px; }
 .pd-pri b { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--muted); }
 .pri-proc { color: var(--muted); }
+.smery { display: grid; gap: 6px; }
+.smer { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: start; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: 15px; line-height: 1.5; background: var(--paper); }
+.smer input { margin-top: 4px; }
+.smer > span { font-family: var(--serif); font-weight: 400; font-size: 15px; color: var(--ink); }
+.smer b { font-family: var(--sans); font-size: 13.5px; margin-right: 4px; }
+.smer:has(input:checked) { border-color: var(--ink); background: var(--surface); box-shadow: inset 0 0 0 1px var(--ink); }
 .pri-warn { font-family: var(--sans); font-size: 13.5px; font-weight: 700; color: var(--bad); margin: 0; min-height: 0; }
 .pri-warn:empty { display: none; }
 .pri-blk select { font: inherit; font-family: var(--sans); font-size: 15px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); }

@@ -12,9 +12,9 @@
   const POLE = {
     nazev: "název", zkratka: "zkratka", slogan: "slogan", barva: "barva", logo_path: "logo", plakat_path: "plakát", spot_url: "spot",
     osa_lp: "pozice na osách", osa_lk: "pozice na osách", osy_zduvodneni: "zdůvodnění pozice",
-    p1: "priorita 1", p1_popis: "priorita 1", p1_karta: "priorita 1", p1_smer: "priorita 1", p1_proc: "priorita 1",
-    p2: "priorita 2", p2_popis: "priorita 2", p2_karta: "priorita 2", p2_smer: "priorita 2", p2_proc: "priorita 2",
-    p3: "priorita 3", p3_popis: "priorita 3", p3_karta: "priorita 3", p3_smer: "priorita 3", p3_proc: "priorita 3",
+    p1: "priorita 1", p1_popis: "priorita 1", p1_karta: "priorita 1", p1_smer: "priorita 1", p1_smer_volba: "priorita 1", p1_proc: "priorita 1",
+    p2: "priorita 2", p2_popis: "priorita 2", p2_karta: "priorita 2", p2_smer: "priorita 2", p2_smer_volba: "priorita 2", p2_proc: "priorita 2",
+    p3: "priorita 3", p3_popis: "priorita 3", p3_karta: "priorita 3", p3_smer: "priorita 3", p3_smer_volba: "priorita 3", p3_proc: "priorita 3",
     zakon_nazev: "vlajkový zákon", zakon_problem: "vlajkový zákon", zakon_reseni: "vlajkový zákon", zakon_koho: "vlajkový zákon",
     zakon_naklady: "vlajkový zákon", zakon_pravomoc: "vlajkový zákon", zakon_typ: "vlajkový zákon", kandidatka: "kandidátní listina"
   };
@@ -29,6 +29,23 @@
     [11, "Kamery s rozpoznáváním obličeje", "Bezpečnost"], [12, "Branná příprava", "Bezpečnost"],
     [13, "Volební věk", "Demokracie"], [14, "Celostátní referendum", "Demokracie"]
   ];
+  /* Rozcestníky řešení z karet problémů (směry A–D), strana může zvolit i vlastní směr. */
+  const ROZC = {
+    1: ["Nechat to na každé škole, ať se dohodne s žáky a rodiči.", "Zákonem zakázat mobily ve všech školách po celou dobu vyučování, i o přestávkách.", "Mobily povolit a místo zákazu učit, jak s nimi rozumně zacházet.", "Zákaz jen pro mladší žáky, starší si za mobil odpovídají sami."],
+    2: ["Školné, které se splácí z platu až po nástupu do práce, a jen když člověk vydělává dost.", "Zdarma jen obory, které společnost nejvíc potřebuje (lékaři, učitelé, technici), ostatní placené.", "Vysoké školy zůstanou zdarma a stát jim dá víc peněz.", "Školné pro všechny, ale s vysokými stipendii pro nadané a pro studenty z chudších rodin."],
+    3: ["Nechat na rodičích, stát do toho nemá mluvit.", "Povinnosti pro platformy: dětem vypnout nekonečné scrollování, noční upozornění a doporučování podle algoritmu.", "Zákaz účtů do 15 let s povinným ověřováním věku.", "Povinná mediální výchova ve školách a podpora rodičů, bez zákazů."],
+    4: ["Stát určí jen malé společné jádro (čeština, matematika, cizí jazyk), zbytek předmětů si žák vybere sám.", "Nechat na každé škole, kolik volby žákům dá.", "Zachovat široký společný základ pro všechny, volitelné předměty jen v posledních dvou ročnících.", "Víc volby, ale stát zaplatí školám víc učitelů a menší skupiny, aby bohatou nabídku neměly jen velké školy."],
+    5: ["Stejná nízká daň z příjmu pro všechny, majetkové daně nezvyšovat.", "Zdanit velká dědictví a dražší nemovitosti a za to snížit daně z práce.", "Snížit daně všem a zmenšit stát (méně úředníků, méně dotací).", "Vyšší sazba daně z příjmu pro lidi s vysokými příjmy."],
+    6: ["Kdo pro aplikaci pracuje pravidelně, musí být zaměstnanec se všemi právy.", "Nechat to volné, flexibilita vyhovuje studentům i firmám.", "Méně papírování a nižší odvody pro všechny malé živnostníky.", "Minimální odměna za hodinu a povinné úrazové pojištění placené firmou."],
+    7: ["Příspěvek nebo výhodná půjčka mladým na první vlastní bydlení.", "Zrychlit povolování staveb a uvolnit pravidla, aby se stavělo víc.", "Stát a obce postaví levné nájemní byty pro mladé.", "Strop nájmů: zákon určí, kolik smí nájem nejvýš stát."],
+    8: ["Ceny ať si určují dopravci a města, stát nemá doplácet.", "Zdarma nebo levněji jen pro studenty z rodin s nižšími příjmy.", "Víc spojů na venkově a bezpečné cyklostezky místo slev.", "Veřejná doprava zdarma pro všechny studenty, zaplatí stát."],
+    9: ["Pomoc jen chudším domácnostem, třeba příspěvek na energie.", "Stát postaví vlastní elektrárny, aby Česko nebylo závislé na trhu a dovozu.", "Ceny nechat trhu, vysoké ceny lidi naučí šetřit.", "Zákon, podle kterého stát při prudkém zdražení určí nejvyšší cenu."],
+    10: ["Konec uhlí spojit s programem nové práce pro uhelné regiony.", "Uhlí nechat, dokud se vyplácí, o konci ať rozhodne trh.", "Skončit s uhlím co nejdřív a rychle stavět obnovitelné zdroje.", "Nahradit uhlí hlavně jadernou energií, i když to trvá déle."],
+    11: ["Použít jen při hledání konkrétního nebezpečného člověka a se souhlasem soudu.", "Úplně zakázat, je to příliš velký zásah do soukromí.", "Víc policistů v ulicích místo kamer.", "Povolit kamery na nádražích, v metru a na letištích, bezpečnost je přednější."],
+    12: ["Dobrovolné kurzy s armádou a hasiči pro zájemce.", "Povinná branná příprava na všech středních školách: první pomoc, ochrana obyvatel, základy obrany.", "Obnovit povinnou vojenskou službu pro dospělé.", "Jen první pomoc a zvládání krizí (povodeň, výpadek proudu), bez vojenské části."],
+    13: ["Ponechat 18 let, ale zavést ve školách pravidelné školní volby a víc občanské výchovy.", "Volební právo od 16 let ve všech volbách.", "Ponechat 18 let, volba má souviset s plnoletostí.", "Od 16 let jen v obecních a krajských volbách, na zkoušku."],
+    14: ["Víc místních referend a online petic, které musí Sněmovna projednat.", "Celostátní referendum, které mohou vyvolat sami občané sběrem podpisů.", "Žádné obecné referendum, rozhodovat mají volení zástupci, kteří za to nesou odpovědnost.", "Referendum jen o nejzásadnějších věcech, třeba o vstupu do aliance nebo změně Ústavy."]
+  };
   const karta1 = (n) => KARTY.find((x) => x[0] === n) || null;
   /* Pozice na osách a zdůvodnění priorit jsou v tabulce pozice_stran: voliči z paralelní třídy je
      nevidí, dokud učitel neodkryje body (4.7). */
@@ -95,7 +112,7 @@
       ["Název a slogan", !!(s.nazev && p.slogan)],
       ["Logo", !!p.logo_path],
       ["Pozice na osách", p.osa_lp != null && p.osa_lk != null && !!(p.osy_zduvodneni || "").trim()],
-      ["3 priority", [1, 2, 3].every((i) => p["p" + i] && p["p" + i + "_karta"] && p["p" + i + "_smer"] && p["p" + i + "_popis"] && (p["p" + i + "_proc"] || "").trim()) && oblastiPriorit(p).ruzne],
+      ["3 priority", [1, 2, 3].every((i) => p["p" + i] && p["p" + i + "_karta"] && p["p" + i + "_smer_volba"] && (p["p" + i + "_smer"] || "").trim() && p["p" + i + "_popis"] && (p["p" + i + "_proc"] || "").trim()) && oblastiPriorit(p).ruzne],
       ["Vlajkový zákon", !!(p.zakon_nazev && p.zakon_problem && p.zakon_reseni && p.zakon_koho && p.zakon_naklady && p.zakon_typ)],
       ["Kandidátní listina a role", cl.length > 0 && cl.every((c) => c.role) && ROLE.every((r) => role.has(r))],
       ["Plakát", !!p.plakat_path],
@@ -318,6 +335,16 @@
         : `<input id="${id}" type="text" data-col="${col}" value="${esc(v || "")}" maxlength="${o.max || 160}"${dis}${o.ph ? ` placeholder="${esc(o.ph)}"` : ""}>`;
       return `<div class="fld"><label for="${id}">${esc(label)}</label>${o.hint ? `<p class="hint">${o.hint}</p>` : ""}${tag}</div>`;
     };
+    const smerBlok = (i) => {
+      const k = p["p" + i + "_karta"], vol = p["p" + i + "_smer_volba"], moz = k ? ROZC[k] : null;
+      return `<div class="fld"><span class="lbl">Směr řešení</span>
+        ${moz ? `<div class="smery" role="radiogroup" aria-label="Směr řešení priority ${i}">
+          ${moz.map((t, j) => { const L = "ABCD"[j]; return `<label class="smer"><input type="radio" name="smer${i}" value="${L}" data-smer="${i}"${vol === L ? " checked" : ""}${dis}><span><b>${L}</b> ${esc(t)}</span></label>`; }).join("")}
+          <label class="smer"><input type="radio" name="smer${i}" value="vlastni" data-smer="${i}"${vol === "vlastni" ? " checked" : ""}${dis}><span><b>Vlastní směr</b></span></label>
+        </div>` : '<p class="hint">Nejdřív vyberte kartu problému, pak se tu objeví směry z jejího rozcestníku.</p>'}
+      </div>
+      ${vol === "vlastni" ? inp("p" + i + "_smer", "Váš vlastní směr", { area: true, rows: 2, max: 600, hint: "Jednou dvěma větami: jaké řešení prosazujete." }) : ""}`;
+    };
     const slider = (col, a, b) => `<div class="fld osa">
         <label for="f-${col}">${esc(a)} – ${esc(b)}</label>
         <div class="osa-row"><span>${esc(a)}</span><input id="f-${col}" type="range" min="-5" max="5" step="1" data-col="${col}" value="${p[col] == null ? 0 : p[col]}"${dis}><span>${esc(b)}</span></div>
@@ -363,7 +390,7 @@
                 ${[...new Set(KARTY.map((k) => k[2]))].map((ob) => `<optgroup label="${esc(ob)}">${KARTY.filter((k) => k[2] === ob).map((k) => `<option value="${k[0]}"${p["p" + i + "_karta"] === k[0] ? " selected" : ""}>${k[0]}. ${esc(k[1])}</option>`).join("")}</optgroup>`).join("")}
               </select></div>
               ${inp("p" + i, "Název priority", { max: 120, hint: "Krátce, objeví se na kartě strany." })}
-              ${inp("p" + i + "_smer", "Zvolený směr z rozcestníku", { area: true, rows: 2, max: 600, hint: "Opište směr z karty, nebo napište vlastní." })}
+              ${smerBlok(i)}
               ${inp("p" + i + "_popis", "Konkrétní opatření", { area: true, rows: 2, max: 600, hint: "Co přesně uděláte, kdo to zařídí a jak." })}
               ${inp("p" + i + "_proc", "Proč to odpovídá pozici strany", { area: true, rows: 2, max: 600, hint: "Jedna věta. Voliči z paralelní třídy ji před volbami neuvidí." })}
             </div></div>`).join("")}
@@ -419,6 +446,19 @@
 
   async function ulozSloupec(s, col, val) {
     const c = S().client;
+    if (typeof col === "object") {   // více sloupců profilu najednou
+      ed.pending++; savebar("Ukládám…");
+      const res = await c.from("profily_stran").update(col).eq("strana_id", s.id).select("strana_id");
+      ed.pending--;
+      if (res.error || !res.data || !res.data.length) { savebar(res.error ? "Neuloženo: " + res.error.message : "Neuloženo: profil je uzamčený (uplynula uzávěrka).", true); return false; }
+      Object.assign(s.p, col);
+      Object.keys(col).forEach((k) => ed.dirty.delete(k));
+      const d = new Date();
+      if (!ed.pending) savebar(`Uloženo ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`);
+      const ch = document.getElementById("checklist");
+      if (ch) { const h = hotovo(s); ch.innerHTML = checklist(h); ch.previousElementSibling.textContent = `Hotovo ${h.filter((x) => x[1]).length} ze ${h.length}`; }
+      return true;
+    }
     ed.pending++;
     savebar("Ukládám…");
     const res = col === "nazev"
@@ -475,10 +515,18 @@
     root.querySelectorAll("input[type=radio][data-col]").forEach((el) => el.addEventListener("change", () => ulozSloupec(s, el.dataset.col, el.value)));
 
     root.querySelectorAll("select[data-col]").forEach((el) => el.addEventListener("change", async () => {
-      if (await ulozSloupec(s, el.dataset.col, el.value ? +el.value : null)) {
-        const w = document.getElementById("pri-warn");
-        if (w) w.textContent = oblastiPriorit(s.p).ruzne ? "" : "Dvě priority jsou ze stejné oblasti. Každá musí být z jiné.";
-      }
+      const i = el.dataset.col.match(/^p(\d)_karta$/)[1];
+      const patch = { [el.dataset.col]: el.value ? +el.value : null };
+      if (s.p["p" + i + "_smer_volba"] && s.p["p" + i + "_smer_volba"] !== "vlastni") Object.assign(patch, { ["p" + i + "_smer_volba"]: null, ["p" + i + "_smer"]: null });
+      if (await ulozSloupec(s, patch)) kresliEditorZachovej(s, "sec-program");
+    }));
+
+    root.querySelectorAll("input[type=radio][data-smer]").forEach((el) => el.addEventListener("change", async () => {
+      const i = el.dataset.smer, L = el.value, k = s.p["p" + i + "_karta"];
+      const patch = { ["p" + i + "_smer_volba"]: L };
+      if (L !== "vlastni") patch["p" + i + "_smer"] = ROZC[k]["ABCD".indexOf(L)];
+      else if (s.p["p" + i + "_smer_volba"] !== "vlastni") patch["p" + i + "_smer"] = null;
+      if (await ulozSloupec(s, patch)) kresliEditorZachovej(s, "sec-program");
     }));
 
     root.querySelectorAll(".sw[data-barva]").forEach((b) => b.addEventListener("click", async () => {
