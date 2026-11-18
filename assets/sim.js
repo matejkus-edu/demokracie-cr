@@ -193,57 +193,107 @@
   function renderHarmonogram() {
     const main = A().main, H = window.HARMONOGRAM, now = new Date();
     const T = vybranaTrida();
-    const md = A().md;
+    // hodnota, která se může lišit po třídách: { L1B: …, L1C: … }
+    const proT = (x) => (x && typeof x === "object" && !Array.isArray(x) && (x.L1B !== undefined || x.L1C !== undefined) ? x[T] : x);
+    const den = (iso) => { const x = d(iso); return `${DNY[x.getDay()]} ${x.getDate()}. ${x.getMonth() + 1}.`; };
+    const hodinyTxt = (arr) => (arr || []).map(den).join(" a ");
+    const cas = (dt) => `${dt.getHours()}:${String(dt.getMinutes()).padStart(2, "0")}`;
+    const stejnyDen = (a, b) => a.toDateString() === b.toDateString();
 
-    const terminy = [];
-    H.tydny.forEach((w) => (w.ukoly || []).forEach((u) => terminy.push(u)));
-    const nejblizsi = terminy
-      .filter((u) => (u.konec ? d(u.konec) : d(u.termin)) >= now)
-      .sort((a, b) => d(a.termin) - d(b.termin))
-      .slice(0, 3);
+    // všechny úkoly s kontextem (blok, epizoda, data hodin)
+    const vse = [];
+    H.bloky.forEach((b) => (b.epizody || []).forEach((ep) => ep.ukoly.forEach((u) => vse.push({ u, ep, b,
+      hodiny: proT(u.hodina) || proT(ep.hodiny) || proT(b.hodiny) || [] }))));
+
+    function kdyUkol(x) {
+      const u = x.u, od = proT(u.od), termin = proT(u.termin);
+      if (u.kde === "hodina") {
+        let t = hodinyTxt(x.hodiny);
+        if (termin) {
+          const tm = d(termin), h0 = x.hodiny.length ? d(x.hodiny[x.hodiny.length - 1]) : null;
+          t += h0 && stejnyDen(tm, h0) ? `, uzávěrka ve ${cas(tm)}` : `, uzávěrka ${kdy(tm)}`;
+        }
+        if (u.denik) t += ", dopsat lze do 20:00";
+        return t;
+      }
+      if (od && termin) return `od ${kdy(d(od))} do ${kdy(d(termin))}`;
+      if (termin) return `do ${kdy(d(termin))}`;
+      if (od) return `od ${kdy(d(od))}`;
+      return "";
+    }
+    function konecUkolu(x) {
+      const termin = proT(x.u.termin);
+      if (termin) return d(termin);
+      if (x.hodiny.length) return konecDne(x.hodiny[x.hodiny.length - 1]);
+      return null;
+    }
+
+    // nejbližší termíny
+    const nejblizsi = vse.filter((x) => x.u.kratce && proT(x.u.termin) && d(proT(x.u.termin)) >= now)
+      .sort((a, b) => d(proT(a.u.termin)) - d(proT(b.u.termin))).slice(0, 3);
+
+    // stav bloků: proběhlo / právě / další na řadě
+    const rozsahBloku = (b) => {
+      const h = proT(b.hodiny) || [];
+      const zac = d(h[0]); zac.setDate(zac.getDate() - ((zac.getDay() + 6) % 7) - 2); // sobota před týdnem hodiny
+      let kon = konecDne(h[h.length - 1]);
+      vse.filter((x) => x.b === b).forEach((x) => { const k = konecUkolu(x); if (k && k > kon) kon = k; });
+      return [zac, kon];
+    };
+    const stavy = H.bloky.map((b) => { const [z, k] = rozsahBloku(b); return now > k ? "past" : now >= z ? "now" : "future"; });
+    if (!stavy.includes("now")) { const i = stavy.indexOf("future"); if (i >= 0) stavy[i] = "next"; }
+    const stLabel = { past: "proběhlo", now: "právě probíhá", next: "další na řadě", future: "" };
 
     const osobni = auth.profil && !auth.profil.ucitel
       ? `<p class="me">${esc(auth.profil.jmeno)}, třída ${esc(auth.profil.trida)}. ${auth.profil.strany ? `Strana <b>${esc(auth.profil.strany.nazev)}</b>${auth.profil.role_ve_strane ? `, role ${esc(auth.profil.role_ve_strane)}` : ""}.` : "Do strany tě učitel zařadí v hodině 23. 11."}</p>`
       : "";
 
-    const tydny = H.tydny.map((w) => {
-      const zac = new Date(d(w.od).getTime() - 2 * 86400000);
-      const kon = konecDne(w.do);
-      const stav = now > kon ? "past" : now >= zac ? "now" : "future";
-      const v = Object.assign({}, w, (w[T] || {}));
-      const stLabel = stav === "past" ? "proběhlo" : stav === "now" ? "tento týden" : "";
-      if (w.volno) {
-        return `<li class="wk volno ${stav}"><div class="wk-date"><b>${rozsah(w.od, w.do)}</b>${stLabel ? `<span class="wk-st">${stLabel}</span>` : ""}</div><div class="wk-body"><p class="vl">${esc(w.volno)}${w.d ? `. ${esc(w.d)}` : ""}</p></div></li>`;
-      }
-      const row = (cls, lab, html) => `<div class="row ${cls}"><span class="lab">${lab}</span><div>${html}</div></div>`;
-      let body = "";
-      if (v.cz) body += row("r-cz", "Téma", `<h3>${esc(v.cz.t)}</h3>${v.cz.d ? `<p>${esc(v.cz.d)}</p>` : ""}${v.cz.teorie ? `<p class="teorie">Teorie: ${md(v.cz.teorie)}</p>` : ""}${v.cz.link ? `<p class="teorie"><a class="inl" href="${esc(v.cz.link[0])}" rel="noopener">${esc(v.cz.link[1])}</a></p>` : ""}`);
-      if (v.sim) body += row("r-sim", "Simulace", `<h3>${esc(v.sim.t)}</h3>${v.sim.d ? `<p>${esc(v.sim.d)}</p>` : ""}`);
-      if (v.denik) body += row("r-den", "Deník aktéra", `<p>${esc(H.denik[v.denik])}. ${esc(v.denikPozn || "Píše se v hodině.")}</p><p class="teorie"><a class="inl" href="#denik-${v.denik}">Otevřít v deníku</a></p>`);
-      (v.ukoly || []).forEach((u) => {
-        body += row("r-ukol" + (u.volby ? " r-volby" : ""), u.volby ? "Volby" : u.strany ? "Úkol pro strany" : "Úkol",
-          `<p>${esc(u.t)}</p><p class="termin">${u.konec ? `od ${esc(kdy(d(u.termin)))} do ${esc(kdy(d(u.konec)))}` : `do ${esc(kdy(d(u.termin)))}`}</p>`);
-      });
-      return `<li class="wk ${stav}"><div class="wk-date"><b>${rozsah(w.od, w.do)}</b>${stLabel ? `<span class="wk-st">${stLabel}</span>` : ""}</div><div class="wk-body">${body}</div></li>`;
+    const ukolHtml = (x) => {
+      const u = x.u, k = konecUkolu(x), hotovo = k && now > k;
+      const odkaz = u.denik ? [`#denik-${u.denik}`, "Otevřít v deníku"] : u.odkaz;
+      return `<li class="hu ${u.kde === "doma" ? "hu-doma" : "hu-hodina"}${u.volby ? " hu-volby" : ""}${hotovo ? " hu-past" : ""}">
+        <span class="hu-kde">${u.kde === "doma" ? (u.volitelne ? "Doma, volitelně" : "Doma") : "V hodině"}</span>
+        <div class="hu-tx"><p>${esc(u.t)}${odkaz ? ` <a class="inl" href="${esc(odkaz[0])}">${esc(odkaz[1])}</a>` : ""}</p>
+          <p class="hu-meta"><span class="hu-kdy">${esc(kdyUkol(x))}</span>${u.vaha ? `<span class="hu-vaha" title="Váha ve skupinovém hodnocení strany (HV2)">${u.vaha} % hodnocení strany</span>` : ""}</p></div>
+      </li>`;
+    };
+
+    const bloky = H.bloky.map((b, i) => {
+      const st = stavy[i], pozn = proT(b.pozn);
+      const ep = (b.epizody || []).map((e) => `<section class="hb-ep">
+          <h3><span class="ep-k">${esc(e.k)}</span> ${esc(e.t)}</h3>
+          <ol class="hu-list">${vse.filter((x) => x.ep === e).map(ukolHtml).join("")}</ol>
+        </section>`).join("");
+      return `<li class="hb hb-${st}${ep ? "" : " hb-bez"}">
+        <div class="hb-head">
+          <p class="hb-when"><b>${esc(hodinyTxt(proT(b.hodiny)))}</b>${stLabel[st] ? `<span class="hb-st">${stLabel[st]}</span>` : ""}</p>
+          <h2>${esc(b.t)}</h2>
+          ${b.teorie ? `<p class="hb-teorie"><a class="inl" href="${esc(b.teorie[0])}"${b.teorie[0].startsWith("http") ? ' rel="noopener"' : ""}>${esc(b.teorie[1])}</a></p>` : ""}
+          ${pozn ? `<p class="hb-pozn">${esc(pozn)}</p>` : ""}
+        </div>
+        ${ep}
+      </li>`;
     }).join("");
 
     main.innerHTML = `
     <div class="wrap">
       <div class="page-head"><div>
-        <h1>Harmonogram simulace</h1>
-        <p class="lead">Co se kdy probírá a co se v simulaci děje. Blok Demokracie a právní stát.</p>
+        <h1>Harmonogram</h1>
+        <p class="hb-motto">„${esc(H.nazev)}“</p>
         ${osobni}
       </div></div>
       <div class="toolbar">
         ${auth.profil && auth.profil.trida ? "" : `<div class="seg" id="seg-trida">${TRIDY.map((t) => `<button type="button" data-t="${t}" aria-pressed="${t === T}">${t}</button>`).join("")}</div>`}
+        <span class="hb-legend"><span class="hu-kde k-hodina">V hodině</span><span class="hu-kde k-doma">Doma</span></span>
         ${auth.profil ? "" : '<span class="tb-label">Po přihlášení uvidíš svou třídu a stranu. <a class="inl" href="#ucet">Přihlásit se</a></span>'}
       </div>
-      ${nejblizsi.length ? `<section class="soon" aria-label="Nejbližší termíny"><h2>Nejbližší termíny</h2><ul>${nejblizsi.map((u) => {
-        const probiha = u.konec && d(u.termin) <= now && d(u.konec) >= now;
-        const kdyTxt = probiha ? "právě probíhá" : zaKolik(d(u.termin), now);
-        return `<li class="${u.volby ? "volby" : ""}"><span class="when"><b>${esc(kdyTxt)}</b>${esc(kdy(d(u.termin)))}</span><span>${esc(u.t)}</span></li>`;
+      ${nejblizsi.length ? `<section class="soon" aria-label="Nejbližší termíny"><h2>Nejbližší termíny</h2><ul>${nejblizsi.map((x) => {
+        const od = proT(x.u.od), tm = d(proT(x.u.termin));
+        const probiha = od && d(od) <= now;
+        const ref = x.u.volby && od && !probiha ? d(od) : tm;
+        return `<li class="${x.u.volby ? "volby" : ""}"><span class="when"><b>${esc(probiha ? "právě probíhá" : zaKolik(ref, now))}</b>${esc(x.u.volby && od && !probiha ? "od " + kdy(d(od)) : "do " + kdy(tm))}</span><span>${esc(x.u.kratce)}</span></li>`;
       }).join("")}</ul></section>` : ""}
-      <ol class="weeks">${tydny}</ol>
+      <ol class="hb-list">${bloky}</ol>
     </div>`;
 
     document.querySelectorAll("#seg-trida button").forEach((b) => b.addEventListener("click", () => { A().store.set("trida", b.dataset.t); renderHarmonogram(); }));
@@ -436,7 +486,7 @@
 
   /* ================= REGISTRACE STRÁNEK ================= */
   window.EXTRA_PAGES = Object.assign(window.EXTRA_PAGES || {}, {
-    harmonogram: { title: "Harmonogram simulace", render: renderHarmonogram },
+    harmonogram: { title: "Harmonogram", render: renderHarmonogram },
     ucet: { title: "Přihlášení", render: renderUcet },
     ucitel: { title: "Učitelský panel", render: renderUcitel }
   });
