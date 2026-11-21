@@ -114,7 +114,7 @@
       <div class="wrap narrow">
         <div class="page-head"><div>
           <h1>${esc(p.jmeno)}</h1>
-          <p class="lead">${p.ucitel ? "Učitelský účet." : `Třída ${esc(p.trida)}. ${p.strany ? `Strana ${esc(p.strany.nazev)}${p.role_ve_strane ? `, role ${esc(p.role_ve_strane)}` : ""}.` : "Do strany tě učitel zařadí v hodině 23. 11."}`}</p>
+          <p class="lead">${p.ucitel ? "Učitelský účet." : `Třída ${esc(p.trida)}. ${p.strany ? `Strana ${esc(p.strany.nazev)}${p.role_ve_strane ? `, ${esc(p.role_ve_strane)}` : ""}.` : "Do strany tě učitel zařadí v hodině 23. 11."}`}</p>
         </div></div>
         <div class="card-form">
           ${p.ucitel ? '<p><a class="btn" href="#ucitel">Otevřít učitelský panel</a></p>' : `<p class="btnrow"><a class="btn" href="#harmonogram">Harmonogram simulace</a>${p.strana_id ? '<a class="btn ghost" href="#strana">Profil naší strany</a>' : ""}</p>`}
@@ -254,7 +254,7 @@
     const stLabel = { past: "proběhlo", now: "právě probíhá", next: "další na řadě", future: "" };
 
     const osobni = auth.profil && !auth.profil.ucitel
-      ? `<p class="me">${esc(auth.profil.jmeno)}, třída ${esc(auth.profil.trida)}. ${auth.profil.strany ? `Strana <b>${esc(auth.profil.strany.nazev)}</b>${auth.profil.role_ve_strane ? `, role ${esc(auth.profil.role_ve_strane)}` : ""}.` : "Do strany tě učitel zařadí v hodině 23. 11."}</p>`
+      ? `<p class="me">${esc(auth.profil.jmeno)}, třída ${esc(auth.profil.trida)}. ${auth.profil.strany ? `Strana <b>${esc(auth.profil.strany.nazev)}</b>${auth.profil.role_ve_strane ? `, ${esc(auth.profil.role_ve_strane)}` : ""}.` : "Do strany tě učitel zařadí v hodině 23. 11."}</p>`
       : "";
 
     const ukolHtml = (x) => {
@@ -325,7 +325,7 @@
     const c = auth.client, T = panel.trida;
     const [z, s, n] = await Promise.all([
       c.from("zaci").select("id, jmeno, trida, strana_id, role_ve_strane, login, kody(kod)").eq("trida", T).eq("ucitel", false).order("login"),
-      c.from("strany").select("id, nazev, trida, poradi, stav_uprav, created_at").eq("trida", T).order("poradi").order("created_at"),
+      c.from("strany").select("id, nazev, trida, poradi, stav_uprav, created_at, profily_stran(predseda, ukoly)").eq("trida", T).order("poradi").order("created_at"),
       c.from("nastaveni").select("uzaverka_stran").eq("id", 1).maybeSingle()
     ]);
     panel.uzaverka = n.data ? n.data.uzaverka_stran : null;
@@ -405,18 +405,31 @@
       <section class="pbox wide">
         <div class="pbox-head"><h2>Žáci v ${T}</h2>${panel.zaci.length ? '<button type="button" class="btn small ghost" id="tisk">Vytisknout kódy</button>' : ""}</div>
         ${panel.zaci.length ? `<div class="tbl-wrap"><table class="p-zaci">
-          <thead><tr><th>Jméno</th><th>Kód</th><th>Strana</th><th>Role ve straně</th><th></th></tr></thead>
+          <thead><tr><th>Jméno</th><th>Kód</th><th>Strana</th><th>Předseda a úkoly</th><th></th></tr></thead>
           <tbody>${panel.zaci.map((z) => `<tr data-id="${z.id}">
             <td>${esc(z.jmeno)}</td>
             <td><code>${esc(z.kod || "")}</code></td>
             <td><select data-f="strana_id" aria-label="Strana">${opts(z.strana_id)}</select></td>
-            <td class="role">${z.role_ve_strane ? esc(z.role_ve_strane) : '<span class="muted">určí strana</span>'}</td>
+            <td class="role">${ukolyZaka(z)}</td>
             <td class="acts"><button type="button" class="mini" data-kod="${z.id}">Nový kód</button><button type="button" class="mini danger" data-smaz="${z.id}">Smazat</button></td>
           </tr>`).join("")}</tbody></table></div>` : '<p class="hint">Zatím žádní žáci. Přidejte je seznamem jmen výše.</p>'}
       </section>
     </div>
     <div class="kody-tisk" aria-hidden="true">${panel.zaci.map((z) => `<div class="kt"><p class="kt-t">Simulace ${T}</p><p class="kt-j">${esc(z.jmeno)}</p><p class="kt-k">${esc(z.kod || "")}</p><p class="kt-u">${esc(location.origin + location.pathname)}#ucet</p></div>`).join("")}</div>`;
     bindPanel();
+  }
+
+  // předseda a úkoly žáka z profilu jeho strany (podklad k hodnocení plnění úkolů)
+  function ukolyZaka(z) {
+    const st = panel.strany.find((x) => x.id === z.strana_id);
+    if (!st) return '<span class="muted">bez strany</span>';
+    const p = (Array.isArray(st.profily_stran) ? st.profily_stran[0] : st.profily_stran) || {};
+    const u = p.ukoly || {}, seznam = window.UKOLY_STRAN || [];
+    const moje = seznam.filter((x) => (u[x.k] || []).includes(z.id));
+    const out = [];
+    if (p.predseda === z.id) out.push("<b>předseda/předsedkyně</b>");
+    out.push(moje.length ? `<span class="p-ukoly">${moje.map((x) => `${x.kde === "hodina" ? "hodina" : "doma"}: ${esc(x.t)}`).join("<br>")}</span>` : '<span class="muted">zatím bez úkolu</span>');
+    return out.join(" ");
   }
 
   function dvaKroky(btn, akce) {

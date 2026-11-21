@@ -37,7 +37,7 @@ window.HARMONOGRAM = {
         {
           k: "E1", t: "Zakládání politických stran",
           ukoly: [
-            { kde: "hodina", t: "Vytvoříte týmy (každý tým je jedna strana), rozdělíte si role i úkoly. Rozpis jde ke schválení učiteli." },
+            { kde: "hodina", t: "Vytvoříte týmy (každý tým je jedna strana), zvolíte předsedu nebo předsedkyni strany a rozdělíte si úkoly ze seznamu (u každého úkolu jméno). Rozpis jde ke schválení učiteli." },
             { kde: "hodina", t: "Na základě vylosované pozice upřesníte ideologické ukotvení strany na dvou osách.", vaha: 10 },
             { kde: "hodina", t: "Vyberete si 3 programové priority a napíšete k nim zdůvodnění a konkrétní opatření.", vaha: 20 },
             { kde: "hodina", t: "Vlajkový zákon: rozpracujete ho podle šablony věcného záměru a učitel ho schválí.", vaha: 30 },
@@ -55,7 +55,7 @@ window.HARMONOGRAM = {
         {
           k: "E2", t: "Kampaň a volby",
           ukoly: [
-            { kde: "doma", t: "Profil strany na webu: vyplníte všechny povinné součásti (název, logo, slogan, bod na osách, 3 programové priority, vlajkový zákon, kandidátní listina s rolí každého člena). Pozici, priority a vlajkový zákon přepíšete z verze schválené v hodině.", termin: "2026-11-29T23:59", kratce: "Profil strany na webu", odkaz: ["#strana", "Profil strany"] },
+            { kde: "doma", t: "Profil strany na webu: vyplníte všechny povinné součásti (název, logo, slogan, bod na osách, 3 programové priority, vlajkový zákon, kandidátní listina, předseda a rozdělení úkolů). Pozici, priority a vlajkový zákon přepíšete z verze schválené v hodině. Úkoly na doma plní ten, komu připadly při rozdělení.", termin: "2026-11-29T23:59", kratce: "Profil strany na webu", odkaz: ["#strana", "Profil strany"] },
             { kde: "doma", t: "Kampaň: povinně plakát, volitelně volební video (spot), které může hodnocení výrazně zlepšit. Obojí nahrajete do profilu strany.", vaha: 20, termin: "2026-11-29T23:59", kratce: "Plakát (a volitelně spot)", odkaz: ["#strana", "Profil strany"] },
             { kde: "hodina", t: "Odpovědi do kalkulačky: odpovíte za stranu na všech 14 výroků i se zdůvodněním (nejvýš 3 neutrální odpovědi). Pak se odpovědi uzamknou.", vaha: 20, termin: { L1C: "2026-11-30T20:00", L1B: "2026-12-01T20:00" }, kratce: "Odpovědi strany do kalkulačky", odkaz: ["#kalkulacka-strana", "Odpovědi do kalkulačky"] },
             { kde: "hodina", t: "Deník, zápis 2.", denik: 2, vahaZak: 15 },

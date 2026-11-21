@@ -613,13 +613,27 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .radios { display: flex; flex-wrap: wrap; gap: 8px 18px; }
 .radio { font-family: var(--sans); font-size: 14.5px; display: flex; gap: 6px; align-items: center; cursor: pointer; }
 .k-edit { list-style: none; padding: 0; margin: 0; }
-.k-edit li { display: grid; grid-template-columns: 28px minmax(120px, 200px) minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; border-top: 1px solid var(--hair); padding: 10px 0; }
+.k-pred { display: inline-block; margin-left: 6px; font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--paper); background: var(--ink); border-radius: 999px; padding: 1px 8px; vertical-align: 2px; }
+.k-predseda { margin-top: 14px; }
+.k-predseda select { font: inherit; font-family: var(--sans); font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); min-width: 240px; }
+.uk-h { font-family: var(--sans); font-size: 14px; font-weight: 700; margin: 16px 0 6px; }
+.uk-list { list-style: none; padding: 0; margin: 0; }
+.uk-r { display: grid; grid-template-columns: minmax(160px, 260px) minmax(0, 1fr); gap: 6px 14px; align-items: start; border-top: 1px solid var(--hair); padding: 8px 0; }
+.uk-t { font-size: 15px; line-height: 1.45; padding-top: 3px; }
+.uk-jm { display: flex; flex-wrap: wrap; gap: 5px; }
+.chipzak { font-family: var(--sans); font-size: 13px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
+.chipzak:hover:not(:disabled) { border-color: var(--ink); }
+.chipzak[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chipzak:disabled { cursor: default; opacity: .7; }
+.uk-souhrn { border-collapse: collapse; font-family: var(--sans); font-size: 13.5px; margin: 12px 0 8px; }
+.uk-souhrn th, .uk-souhrn td { padding: 4px 14px 4px 0; text-align: left; border-bottom: 1px solid var(--hair); }
+.uk-souhrn td + td, .uk-souhrn th + th { text-align: center; }
+.uk-chyby { margin: 6px 0 0; padding-left: 18px; font-family: var(--sans); font-size: 13.5px; color: var(--bad); font-weight: 600; }
+.uk-ok { margin: 6px 0 0; font-family: var(--sans); font-size: 13.5px; color: var(--ok); font-weight: 700; }
+.p-ukoly { font-size: 12.5px; color: var(--muted); display: block; line-height: 1.45; }
+.k-edit li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; border-top: 1px solid var(--hair); padding: 10px 0; }
 .k-n { font-weight: 900; color: var(--muted); }
 .k-j { font-weight: 700; }
-.k-role { display: flex; flex-wrap: wrap; gap: 4px 6px; }
-.chiprole { font-family: var(--sans); font-size: 12.5px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px 3px 6px; display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
-.chiprole:has(input:checked) { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.chiprole input { margin: 0; accent-color: var(--paper); }
 .k-move { display: flex; gap: 4px; }
 .k-move .mini:disabled { opacity: .3; cursor: default; }
 .savebar { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(150%); background: var(--ink); color: var(--paper); font-family: var(--sans); font-size: 14px; font-weight: 600; padding: 9px 18px; border-radius: 999px; margin: 0; transition: transform .2s, opacity .2s; z-index: 35; max-width: calc(100% - 32px); text-align: center; opacity: 0; pointer-events: none; }
@@ -899,7 +913,7 @@ a.cell:hover { outline: 2px solid var(--ink); outline-offset: 1px; }
   .pd-osy, .osy-grid, .two { grid-template-columns: minmax(0, 1fr); }
   .zakon-card .facts { grid-template-columns: minmax(0, 1fr); }
   .k-edit li { grid-template-columns: 24px minmax(0, 1fr) auto; }
-  .k-role { grid-column: 2 / -1; }
+  .uk-r { grid-template-columns: minmax(0, 1fr); }
   .ed-sec { padding: 18px 16px; }
   .tabs .lg { display: none; }
   .tabs .sm { display: inline; }
