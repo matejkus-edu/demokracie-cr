@@ -37,7 +37,7 @@ window.HARMONOGRAM = {
         {
           k: "E1", t: "Zakládání politických stran",
           ukoly: [
-            { kde: "hodina", t: "Vytvoříte týmy (každý tým je jedna strana), zvolíte předsedu nebo předsedkyni strany a rozdělíte si úkoly ze seznamu (u každého úkolu jméno). Rozpis jde ke schválení učiteli a pak ho přepíšete na web.", odkaz: ["#ukoly", "Rozdělení úkolů"] },
+            { kde: "hodina", t: "Vytvoříte týmy (každý tým je jedna strana), zvolíte předsedu nebo předsedkyni strany a rozdělíte si úkoly ze seznamu (u každého úkolu jméno). Rozdělení zapíšete rovnou na web a učitel ho zkontroluje.", odkaz: ["#ukoly", "Rozdělení úkolů"] },
             { kde: "hodina", t: "Na základě vylosované pozice upřesníte ideologické ukotvení strany na dvou osách.", vaha: 10 },
             { kde: "hodina", t: "Vyberete si 3 programové priority a napíšete k nim zdůvodnění a konkrétní opatření.", vaha: 20 },
             { kde: "hodina", t: "Vlajkový zákon: rozpracujete ho podle šablony věcného záměru a učitel ho schválí.", vaha: 30 },
