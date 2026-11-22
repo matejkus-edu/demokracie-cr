@@ -594,6 +594,9 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .osa-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; font-family: var(--sans); font-size: 13px; color: var(--muted); }
 .osa-row input { width: 100%; accent-color: var(--ink); }
 .osa-val { font-family: var(--sans); font-size: 13.5px; font-weight: 600; margin: 4px 0 0; }
+.zk-pre { display: flex; align-items: center; gap: 8px; }
+.zk-pre span { font-weight: 700; white-space: nowrap; }
+.zk-pre input { flex: 1; min-width: 0; }
 .pri-karta { grid-column: 2; margin: 0 0 2px !important; font-family: var(--sans); font-size: 12.5px !important; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
 .pd-pri li p + p { margin-top: 4px; }
 .pd-pri b { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--muted); }

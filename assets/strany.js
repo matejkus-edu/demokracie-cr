@@ -100,6 +100,10 @@
     return { pocet: ob.length, ruzne: new Set(ob).size === ob.length };
   }
 
+  // Název vlajkového zákona se ukládá bez úvodního „Zákon o“ (to je v šabloně předtištěné)
+  const bezPredpony = (n) => String(n || "").replace(/^\s*z[aá]kon\s+o\s+/i, "");
+  const celyNazev = (n) => (n ? "Zákon o " + bezPredpony(n) : "");
+
   const st = { strany: [], zaci: [], uzaverka: null, odkryt: false, nacteno: 0, odpovedi: [] };
   function kalkHotovo(id) {
     const o = st.odpovedi.filter((x) => x.strana_id === id);
@@ -292,7 +296,7 @@
     const plakat = obrazek(p.plakat_path);
     const pri = [1, 2, 3].map((i) => ({ t: p["p" + i], karta: karta1(p["p" + i + "_karta"]), smer: p["p" + i + "_smer"], popis: p["p" + i + "_popis"], proc: p["p" + i + "_proc"] }))
       .filter((x) => x.t || x.smer || x.popis);
-    const zakon = [["Jaký problém řeší", p.zakon_problem], ["Jak ho řeší", p.zakon_reseni], ["Koho se týká", p.zakon_koho], ["Kolik bude stát", p.zakon_naklady]].filter((x) => x[1]);
+    const zakon = [["Jaký problém řeší", p.zakon_problem], ["Jak ho řeší (co přesně zákon zavádí)", p.zakon_reseni], ["Koho se týká", p.zakon_koho], ["Kolik bude stát a kdo to zaplatí", p.zakon_naklady]].filter((x) => x[1]);
     A().main.innerHTML = `
     <div class="wrap">
       <p class="crumb"><a class="inl" href="#strany">Všechny strany</a></p>
@@ -314,7 +318,7 @@
           </section>
           <section class="pd-sec zakon-card"><h2>Vlajkový zákon</h2>
             ${p.zakon_nazev || zakon.length ? `
-              ${p.zakon_nazev ? `<p class="zk-name">${esc(p.zakon_nazev)}</p>` : ""}
+              ${p.zakon_nazev ? `<p class="zk-name">${esc(celyNazev(p.zakon_nazev))}</p>` : ""}
               ${p.zakon_typ ? `<p class="zk-typ"><a class="chip" href="#zakon">${p.zakon_typ === "ustavni" ? "Ústavní zákon: potřebuje 3/5 v obou komorách" : "Běžný zákon"}</a></p>` : ""}
               <dl class="facts">${zakon.map((x) => `<dt>${esc(x[0])}</dt><dd>${esc(x[1])}</dd>`).join("")}</dl>` : prazdne}
           </section>
@@ -442,13 +446,15 @@
           </section>
 
           <section class="ed-sec" id="sec-zakon"><h2>Vlajkový zákon</h2>
-            ${inp("zakon_nazev", "Název zákona", { max: 160, ph: "např. Zákon o zákazu mobilů ve školách" })}
-            ${inp("zakon_problem", "Jaký problém řeší", { area: true })}
-            ${inp("zakon_reseni", "Jak ho řeší", { area: true })}
-            <div class="two">${inp("zakon_koho", "Koho se týká", { area: true, rows: 2, max: 1000 })}${inp("zakon_naklady", "Kolik bude stát a kdo to zaplatí", { area: true, rows: 2, max: 1000 })}</div>
+            <div class="fld"><label for="f-zakon_nazev">Název zákona</label>
+              <div class="zk-pre"><span aria-hidden="true">Zákon o</span><input id="f-zakon_nazev" type="text" data-col="zakon_nazev" value="${esc(bezPredpony(p.zakon_nazev))}" maxlength="150" placeholder="zákazu mobilů ve školách" aria-label="Název zákona: Zákon o…"${dis}></div></div>
             <div class="fld"><span class="lbl">Typ zákona</span><div class="radios">
-              ${[["bezny", "Běžný zákon"], ["ustavni", "Ústavní zákon (mění Ústavu)"]].map((o) => `<label class="radio"><input type="radio" name="zakon_typ" value="${o[0]}" data-col="zakon_typ"${p.zakon_typ === o[0] ? " checked" : ""}${dis}> ${o[1]}</label>`).join("")}
-            </div><p class="hint">Rozdíl najdete na stránce <a class="inl" href="#zakon">Cesta zákona</a>.</p></div>
+              ${[["bezny", "běžný zákon"], ["ustavni", "ústavní zákon"]].map((o) => `<label class="radio"><input type="radio" name="zakon_typ" value="${o[0]}" data-col="zakon_typ"${p.zakon_typ === o[0] ? " checked" : ""}${dis}> ${o[1]}</label>`).join("")}
+            </div></div>
+            ${inp("zakon_problem", "1. Jaký problém řeší", { area: true, hint: "Co je dnes špatně a koho to trápí?" })}
+            ${inp("zakon_reseni", "2. Jak ho řeší (co přesně zákon zavádí)", { area: true, rows: 4, hint: "Jaké nové pravidlo platí, od kdy a kdo ho má provádět? Musí jít poznat, jestli se splnilo." })}
+            ${inp("zakon_koho", "3. Koho se týká", { area: true, rows: 3, max: 1000, hint: "Kterých lidí, firem nebo institucí? Zhruba kolika?" })}
+            ${inp("zakon_naklady", "4. Kolik bude stát a kdo to zaplatí", { area: true, rows: 3, max: 1000, hint: "Odhad nákladů (řádově). Zaplatí to stát z rozpočtu (a co se omezí), nová daň, firmy, nebo uživatelé? Když zákon nic nestojí, napište, kdo nese jiné náklady." })}
           </section>
 
           <section class="ed-sec" id="sec-kandidatka"><h2>Kandidátní listina a předseda</h2>
