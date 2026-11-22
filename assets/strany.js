@@ -20,6 +20,7 @@
     { k: "kandidatka", t: "Kandidátní listina na web", kde: "doma" }
   ];
   window.UKOLY_STRAN = UKOLY;
+  const PREDSEDA = "předseda/předsedkyně strany";
 
   function ukolySekce(s, cl, dis) {
     if (!cl.length) return '<p class="muted">Strana zatím nemá členy. Do stran žáky zařazuje učitel.</p>';
