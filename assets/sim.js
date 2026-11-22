@@ -34,6 +34,10 @@
     if (auth.user) {
       const { data } = await auth.client.from("zaci").select("id, jmeno, trida, strana_id, role_ve_strane, login, ucitel, strany(nazev)").eq("id", auth.user.id).maybeSingle();
       auth.profil = data || null;
+      if (auth.profil && !auth.profil.ucitel) {
+        const t = await auth.client.from("tridy").select("id, kalk_uzaverka, kalk_otevreno");
+        auth.tridy = t.data || [];
+      }
     }
     const zmena = !auth.ready || predtim !== (auth.user ? auth.user.id : null);
     auth.ready = true;
@@ -50,7 +54,23 @@
     location.hash = "#ucet";
   });
 
+  /* Kalkulačka je pro žáka vidět, když ji učitel zpřístupnil stranám jeho třídy,
+     nebo když už ji může vyplnit jako volič (uplynula uzávěrka paralelní třídy). */
+  auth.tridy = [];
+  auth.kalkVidi = () => {
+    const p = auth.profil;
+    if (!p) return false;
+    if (p.ucitel) return true;
+    const ja = auth.tridy.find((t) => t.id === p.trida), par = auth.tridy.find((t) => t.id && t.id !== p.trida);
+    const zavrena = (t) => !!(t && t.kalk_uzaverka && new Date() >= new Date(t.kalk_uzaverka));
+    return !!(ja && ja.kalk_otevreno && p.strana_id) || zavrena(par);
+  };
+  auth.obnovHlavicku = () => hlavicka();
+  auth.nastavTridy = (rows) => { if (auth.profil && !auth.profil.ucitel) { auth.tridy = rows; hlavicka(); } };
+
   function hlavicka() {
+    const kt = document.querySelector('.tabs a[data-page="kalkulacka"]');
+    if (kt) kt.hidden = !auth.kalkVidi();
     const a = document.getElementById("acct");
     if (!a) return;
     if (auth.profil) {
@@ -259,7 +279,8 @@
 
     const ukolHtml = (x) => {
       const u = x.u, k = konecUkolu(x), hotovo = k && now > k;
-      const odkaz = u.denik ? [`#denik-${u.denik}`, "Otevřít v deníku"] : u.odkaz;
+      let odkaz = u.denik ? [`#denik-${u.denik}`, "Otevřít v deníku"] : u.odkaz;
+      if (odkaz && odkaz[0].startsWith("#kalkulacka") && !auth.kalkVidi()) odkaz = null;
       return `<li class="hu ${u.kde === "doma" ? "hu-doma" : "hu-hodina"}${u.volby ? " hu-volby" : ""}${hotovo ? " hu-past" : ""}">
         <span class="hu-kde">${u.kde === "doma" ? (u.volitelne ? "Doma, volitelně" : "Doma") : "V hodině"}</span>
         <div class="hu-tx"><p>${esc(u.t)}${odkaz ? ` <a class="inl" href="${esc(odkaz[0])}">${esc(odkaz[1])}</a>` : ""}</p>

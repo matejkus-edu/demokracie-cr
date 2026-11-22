@@ -255,7 +255,7 @@
         <div><p class="mine-t">Tvoje strana: <b>${esc(moje.nazev)}</b></p><p class="mine-s">${esc(stavText(moje))}</p></div>
         <div class="mine-a">${muzeUpravovat(moje) ? '<a class="btn" href="#strana">Upravit profil strany</a>' : ""}<a class="btn ghost" href="#ukoly">Rozdělení úkolů</a><a class="btn ghost" href="#strany-${moje.id}">Zobrazit profil</a></div>
       </div>` : ""}
-      <p class="kalk-link"><a class="btn ghost" href="#kalkulacka">Volební kalkulačka</a></p>
+      ${S().kalkVidi && S().kalkVidi() ? '<p class="kalk-link"><a class="btn ghost" href="#kalkulacka">Volební kalkulačka</a></p>' : ""}
       <div class="toolbar">
         <div class="seg" id="s-trida">${TRIDY.map((t) => `<button type="button" data-t="${t}" aria-pressed="${t === T}">Strany ${t}</button>`).join("")}</div>
         <span class="tb-label">${T === paralelni ? "Tyto strany volíš ty." : T === vlastni ? "Strany tvé třídy. Volí je paralelní třída." : ""}</span>
@@ -407,7 +407,7 @@
         <nav class="ed-nav" aria-label="Části profilu">
           <ul>${[["zaklad", "Název a logo"], ["osy", "Pozice na osách"], ["program", "3 priority"], ["zakon", "Vlajkový zákon"], ["kandidatka", "Kandidátka a předseda"], ["kampan", "Plakát a spot"]].map((x) => `<li><a href="#strana${jeUcitel() ? "-" + s.id : ""}" data-jump="${x[0]}">${x[1]}</a></li>`).join("")}</ul>
           <div class="ed-check"><p>Hotovo ${h.filter((x) => x[1]).length} ze ${h.length}</p><ul id="checklist">${checklist(h)}</ul>
-          <p class="ed-links"><a class="btn small ghost" href="#ukoly${jeUcitel() ? "-" + s.id : ""}">Rozdělení úkolů</a><a class="btn small ghost" href="#kalkulacka-strana">Odpovědi do kalkulačky</a></p></div>
+          <p class="ed-links"><a class="btn small ghost" href="#ukoly${jeUcitel() ? "-" + s.id : ""}">Rozdělení úkolů</a>${S().kalkVidi && S().kalkVidi() ? '<a class="btn small ghost" href="#kalkulacka-strana">Odpovědi do kalkulačky</a>' : ""}</p></div>
         </nav>
         <div class="ed-forms">
           <section class="ed-sec" id="sec-zaklad"><h2>Název a logo</h2>

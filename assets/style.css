@@ -824,6 +824,10 @@ a.cell:hover { outline: 2px solid var(--ink); outline-offset: 1px; }
 .kompas .spoj { stroke-width: 1.5; stroke-dasharray: 4 3; opacity: .8; }
 .kk-uz { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 16px; background: var(--surface); border: 1px solid var(--hair); border-radius: 14px; padding: 12px 16px; margin: 0 0 16px; }
 .kk-uz .uzaverka { margin: 0; }
+.tabs a[hidden] { display: none !important; }
+.kk-zpr { flex-basis: 100%; display: flex; gap: 10px; align-items: flex-start; font-family: var(--sans); font-size: 14px; cursor: pointer; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+.kk-zpr input { width: 18px; height: 18px; margin-top: 1px; }
+.kk-zpr .muted { font-size: 13px; }
 .kk-uz-stav { flex-basis: 100%; margin: 0; font-family: var(--sans); font-size: 13.5px; color: var(--muted); }
 .kk-uz-stav b { color: var(--ink); }
 .kk-zamek { font-family: var(--sans); font-size: 12.5px; padding: 3px 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); }

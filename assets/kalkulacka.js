@@ -14,7 +14,7 @@
   const kdy = (x) => `${DNY[x.getDay()]} ${x.getDate()}. ${x.getMonth() + 1}. ${x.getHours()}:${String(x.getMinutes()).padStart(2, "0")}`;
 
   let tU = "L1B";
-  const k = { vyroky: [], strany: [], odpovedi: [], klic: [], uzaverky: {}, odkryt: false, vyplneni: [], zaci: [] };
+  const k = { vyroky: [], strany: [], odpovedi: [], klic: [], uzaverky: {}, otevreno: {}, odkryt: false, vyplneni: [], zaci: [] };
 
   async function nacti(proUcitele) {
     const c = S().client;
@@ -24,7 +24,7 @@
       c.from("odpovedi_stran").select("*"),
       c.from("nastaveni").select("odkryt_body").eq("id", 1).maybeSingle(),
       c.from("vyroky_klic").select("*"),
-      c.from("tridy").select("id, kalk_uzaverka")
+      c.from("tridy").select("id, kalk_uzaverka, kalk_otevreno")
     ];
     if (proUcitele) q.push(c.from("kalk_vyplneni").select("*"), c.from("zaci").select("id, jmeno, trida").eq("ucitel", false).order("jmeno"));
     const r = await Promise.all(q);
@@ -34,7 +34,9 @@
     const jeden = (x) => (Array.isArray(x) ? x[0] : x) || {};
     k.strany = r[1].data.map((s) => Object.assign(s, { p: Object.assign({}, jeden(s.profily_stran), jeden(s.pozice_stran)) }));
     k.uzaverky = {};
-    (r[5].data || []).forEach((t) => { k.uzaverky[t.id] = t.kalk_uzaverka ? new Date(t.kalk_uzaverka) : null; });
+    k.otevreno = {};
+    (r[5].data || []).forEach((t) => { k.uzaverky[t.id] = t.kalk_uzaverka ? new Date(t.kalk_uzaverka) : null; k.otevreno[t.id] = !!t.kalk_otevreno; });
+    if (S().nastavTridy) S().nastavTridy(r[5].data || []);
     k.odkryt = !!(r[3].data && r[3].data.odkryt_body);
     if (proUcitele) { k.vyplneni = r[6].data; k.zaci = r[7].data; }
   }
@@ -45,6 +47,8 @@
   const uzTridy = (t) => k.uzaverky[t] || null;
   const uzavreno = (t) => !!uzTridy(t) && new Date() >= uzTridy(t);
   const paralelniK = (t) => TRIDY.find((x) => x !== t);
+  // kalkulačku za stranu zpřístupní učitel ručně (v hodině 4.6)
+  const proStrany = (t) => !!k.otevreno[t];
   const odpStrany = (id) => k.odpovedi.filter((x) => x.strana_id === id);
   const odp1 = (id, c) => k.odpovedi.find((x) => x.strana_id === id && x.cislo === c);
   function muzeUpravovat(s) {
@@ -52,7 +56,7 @@
     if (!S().profil || S().profil.strana_id !== s.id) return false;
     if (s.stav_kalk === "odemceno") return true;
     if (s.stav_kalk === "zamceno") return false;
-    return !uzavreno(s.trida);
+    return proStrany(s.trida) && !uzavreno(s.trida);
   }
 
   /* Bod strany podle klíče: průměr (odpověď × směr) zvlášť pro obě osy, převedeno na škálu −5 až +5 */
@@ -89,12 +93,20 @@
     if (!S().profil) return hlaska("Volební kalkulačka", 'Kalkulačku vyplníš po přihlášení kódem z lístečku. <a class="inl" href="#ucet">Přihlásit se</a>');
     try { await nacti(jeUcitel()); } catch (e) { return hlaska("Volební kalkulačka", "Nepodařilo se načíst: " + esc(e.message)); }
     const ja = S().profil;
-    if (arg === "strana") return editorStrany(jeUcitel() ? null : ja.strana_id);
+    const zatimNe = () => hlaska("Volební kalkulačka", "Kalkulačku za stranu vyplníte společně v hodině 4.6. Učitel ji zpřístupní na začátku hodiny.");
+    if (arg === "strana") {
+      if (!jeUcitel() && ja.strana_id) { const s = k.strany.find((x) => x.id === ja.strana_id); if (s && !proStrany(ja.trida) && s.stav_kalk !== "odemceno") return zatimNe(); }
+      return editorStrany(jeUcitel() ? null : ja.strana_id);
+    }
     if (arg && arg.startsWith("strana-") && jeUcitel()) return editorStrany(arg.slice(7));
     if (arg === "volic") return volic();
     if (jeUcitel()) return ucitel();
     // žák: do uzávěrky své třídy odpovídá za stranu, pak volí
-    if (ja.strana_id && !uzavreno(ja.trida)) return editorStrany(ja.strana_id);
+    if (ja.strana_id && !uzavreno(ja.trida)) {
+      const s = k.strany.find((x) => x.id === ja.strana_id);
+      if (proStrany(ja.trida) || (s && s.stav_kalk === "odemceno")) return editorStrany(ja.strana_id);
+      if (!uzavreno(paralelniK(ja.trida))) return zatimNe();
+    }
     return volic();
   }
 
@@ -187,7 +199,7 @@
     v.trida = jeUcitel() ? tU : (paralelni || "L1C");
     if (!jeUcitel() && !uzavreno(v.trida)) {
       const uz = uzTridy(v.trida);
-      const vlastni = ja.strana_id && !uzavreno(ja.trida) ? ' Do té doby můžete doplňovat <a class="inl" href="#kalkulacka-strana">odpovědi vaší strany</a>.' : "";
+      const vlastni = ja.strana_id && !uzavreno(ja.trida) && proStrany(ja.trida) ? ' Do té doby můžete doplňovat <a class="inl" href="#kalkulacka-strana">odpovědi vaší strany</a>.' : "";
       return hlaska("Volební kalkulačka", `Kalkulačka se otevře, až strany z ${esc(v.trida)} uzavřou své odpovědi${uz ? `, ${esc(kdy(uz))}` : ""}.${vlastni}`);
     }
     nactiStav();
@@ -311,9 +323,10 @@
         <span class="p-stav" id="kk-stav" role="status"></span>
       </div>
       <div class="kk-uz">
+        <label class="kk-zpr"><input type="checkbox" id="kk-zpr"${proStrany(tU) ? " checked" : ""}> <span><b>Zpřístupnit kalkulačku stranám ${tU}</b><br><span class="muted">${proStrany(tU) ? "Strany z " + tU + " teď kalkulačku vidí a mohou odpovídat." : "Strany z " + tU + " kalkulačku zatím nevidí. Zapněte to na začátku hodiny 4.6."}</span></span></label>
         <label class="uzaverka"><span>Uzávěrka odpovědí stran ${tU}</span><input type="datetime-local" id="kk-uz" value="${lokal(uzTridy(tU))}"></label>
         <button type="button" class="btn small ghost" id="kk-uz-ted"${uzavreno(tU) ? " disabled" : ""}>Uzavřít odpovědi ${tU} teď</button>
-        <p class="kk-uz-stav">${uzTridy(tU) ? (uzavreno(tU) ? `<b>Uzavřeno</b> od ${esc(kdy(uzTridy(tU)))}. Voliči z ${paralelniK(tU)} kalkulačku vyplňují.` : `<b>Otevřeno</b> do ${esc(kdy(uzTridy(tU)))}. Voliči z ${paralelniK(tU)} ji zatím nevidí.`) : "Uzávěrka není nastavená, odpovědi jsou otevřené."}</p>
+        <p class="kk-uz-stav">${uzTridy(tU) ? (uzavreno(tU) ? `<b>Uzavřeno</b> od ${esc(kdy(uzTridy(tU)))}. Voliči z ${paralelniK(tU)} kalkulačku vyplňují.` : `<b>Uzávěrka</b> ${esc(kdy(uzTridy(tU)))}. Pak se odpovědi stran uzamknou a kalkulačka se otevře voličům z ${paralelniK(tU)}.`) : "Uzávěrka není nastavená, odpovědi jsou otevřené."}</p>
       </div>
       ${strany.length ? `<div class="tbl-wrap"><table class="kk-tab">
         <thead><tr><th>Výrok</th>${strany.map((s) => `<th style="--pc:${esc(s.p.barva)}"><a class="inl" href="#kalkulacka-strana-${s.id}">${esc(s.p.zkratka || s.nazev)}</a></th>`).join("")}</tr></thead>
@@ -343,6 +356,12 @@
       k.uzaverky[tU] = d; ucitel(); hlas("Uzávěrka uložena");
     }
     document.getElementById("kk-uz").addEventListener("change", (e) => { if (e.target.value) ulozUz(new Date(e.target.value)); });
+    document.getElementById("kk-zpr").addEventListener("change", async (e) => {
+      const v = e.target.checked;
+      const { data, error } = await S().client.from("tridy").update({ kalk_otevreno: v }).eq("id", tU).select("id, kalk_uzaverka, kalk_otevreno");
+      if (error || !data || !data.length) { e.target.checked = !v; return hlas("Nepodařilo se uložit" + (error ? ": " + error.message : ""), true); }
+      k.otevreno[tU] = v; ucitel(); hlas(v ? `Kalkulačka je zpřístupněná stranám ${tU}` : `Kalkulačka je pro strany ${tU} skrytá`);
+    });
     const ted = document.getElementById("kk-uz-ted");
     ted.addEventListener("click", () => {
       if (ted.dataset.potvrd) return ulozUz(new Date());
