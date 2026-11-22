@@ -35,3 +35,7 @@ Odkazy na konkrétní místo webu: `#mapa-prezident`, `#vztah-veto`, `#volby-kra
 Statický web bez sestavování. Stačí GitHub Pages (Settings → Pages → Deploy from branch → `main` / root), nebo lokálně `python3 -m http.server` ve složce projektu.
 
 Stav faktů: 8. 11. 2026.
+
+## Nasazení
+
+Po každé úpravě JS nebo CSS zvyšte v `index.html` číslo verze `?v=…` u odkazů na soubory v `assets/`. Jinak si prohlížeče žáků mohou podržet starou verzi z mezipaměti.
