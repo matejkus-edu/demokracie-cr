@@ -187,7 +187,8 @@ window.KALENDAR = [
 window.PRINCIPY = [
   { t: "Všeobecné", d: "Volit může každý občan od 18 let. Nerozhoduje majetek, vzdělání, pohlaví ani náboženství.", x: "Kdyby směli volit jen ti, kdo platí daně, bylo by to porušení." },
   { t: "Rovné", d: "Každý hlas má stejnou váhu. Nikdo nemá dva hlasy.", x: "Kdyby měl hlas vysokoškoláka dvojnásobnou váhu, bylo by to porušení." },
-  { t: "Přímé", d: "Voliči volí své zástupce sami, ne přes prostředníky.", x: "Než se v roce 2013 poprvé volilo přímo, volil prezidenta Parlament. To byla volba nepřímá. Vládu nevolí občané přímo nikdy." },
+  { t: "Přímé", d: "Voliči volí své zástupce sami, ne přes prostředníky.", x: "Kdyby občané volili jen volitele a teprve ti by vybírali poslance, bylo by to porušení. Takhle nepřímo se dodnes volí prezident USA.",
+    n: "Princip platí pro volby, ve kterých volí občané. Když Ústava svěří volbu jinému orgánu, porušení to není: prezidenta do roku 2013 volil Parlament a vládu dodnes jmenuje prezident." },
   { t: "Tajné", d: "Nikdo nesmí vědět, koho volíš. Proto jsou plenty a obálky.", x: "Kdyby zaměstnavatel chtěl vidět tvůj hlasovací lístek, bylo by to porušení." },
   { t: "Svobodné", d: "Voliči se rozhodují bez nátlaku a mají na výběr ze skutečně soupeřících stran.", x: "Volby s jedinou povolenou kandidátkou, jako v Československu před rokem 1989, nejsou svobodné." }
 ];

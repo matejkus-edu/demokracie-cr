@@ -521,7 +521,7 @@
     <section class="section"><div class="wrap">
       <h2>Principy volebního práva</h2>
       <p class="sub">Podle čl. 18 Ústavy se volí na základě všeobecného, rovného a přímého volebního práva tajným hlasováním. Svobodu voleb zaručuje Ústava i Listina.</p>
-      <ul class="principles">${PRINCIPY.map((p) => `<li><h3>${esc(p.t)}</h3><p>${esc(p.d)}</p><p class="x">${esc(p.x)}</p></li>`).join("")}</ul>
+      <ul class="principles">${PRINCIPY.map((p) => `<li><h3>${esc(p.t)}</h3><p>${esc(p.d)}</p><p class="x">${esc(p.x)}</p>${p.n ? `<p class="n">${esc(p.n)}</p>` : ""}</li>`).join("")}</ul>
     </div></section>
 
     <section class="section"><div class="wrap">
