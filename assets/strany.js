@@ -9,34 +9,32 @@
   const TRIDY = ["L1B", "L1C"];
   /* Úkoly před volbami (plán kap. 6.2): strana si je v E1 rozdělí, u každého úkolu aspoň jedno jméno. */
   const UKOLY = [
-    { k: "zakon_zamer", t: "Věcný záměr vlajkového zákona", kde: "hodina" },
-    { k: "osy_odu", t: "Odůvodnění pozice na osách", kde: "hodina" },
-    { k: "pri_odu", t: "Odůvodnění 3 priorit", kde: "hodina" },
-    { k: "zapis", t: "Zápis rozhodnutí na papír", kde: "hodina" },
-    { k: "prepis_pozice", t: "Přepis pozice a priorit do profilu", kde: "doma" },
-    { k: "prepis_zakon", t: "Přepis vlajkového zákona do profilu", kde: "doma" },
+    { k: "osy", t: "Pozice na osách a její zdůvodnění", kde: "hodina", vaha: "10 %" },
+    { k: "priority", t: "3 programové priority a konkrétní opatření", kde: "hodina", vaha: "20 %" },
+    { k: "zakon", t: "Vlajkový zákon: věcný záměr", kde: "hodina", vaha: "30 %" },
+    { k: "prepis_pozice", t: "Přepis pozice a priorit do profilu na webu", kde: "doma" },
+    { k: "prepis_zakon", t: "Přepis vlajkového zákona do profilu na webu", kde: "doma" },
+    { k: "texty", t: "Název a texty profilu (včetně sloganu)", kde: "doma" },
     { k: "logo", t: "Logo", kde: "doma" },
-    { k: "slogan", t: "Slogan a texty profilu", kde: "doma" },
-    { k: "plakat", t: "Plakát", kde: "doma" },
-    { k: "kandidatka", t: "Kandidátní listina na web", kde: "doma" },
-    { k: "spot", t: "Spot", kde: "doma", volitelny: true }
+    { k: "plakat", t: "Plakát, volitelně i volební spot (do 2 min)", kde: "doma", vaha: "20 %" },
+    { k: "kandidatka", t: "Kandidátní listina na web", kde: "doma" }
   ];
   window.UKOLY_STRAN = UKOLY;
 
   function ukolySekce(s, cl, dis) {
-    if (!cl.length) return '<p class="muted">Strana zatím nemá členy.</p>';
+    if (!cl.length) return '<p class="muted">Strana zatím nemá členy. Do stran žáky zařazuje učitel.</p>';
     const u = s.p.ukoly || {}, kon = kontrolaUkolu(s);
-    const radek = (x) => `<li class="uk-r"><span class="uk-t">${esc(x.t)}${x.volitelny ? ' <span class="muted">(volitelně)</span>' : ""}</span>
+    const radek = (x) => `<li class="uk-r"><span class="uk-t">${esc(x.t)}<span class="uk-vaha">${x.vaha ? `${x.vaha} hodnocení strany` : "povinný úkol"}</span></span>
       <span class="uk-jm">${cl.map((c) => `<button type="button" class="chipzak" data-ukol="${x.k}" data-zak="${c.id}" aria-pressed="${(u[x.k] || []).includes(c.id)}"${dis}>${esc(c.jmeno)}</button>`).join("")}</span></li>`;
     return `<p class="hint">Přepište rozdělení z papíru z hodiny E1. U každého úkolu klikněte na jméno, může jich být víc. Pravidla: každý úkol má jméno, každý člen má aspoň jeden úkol v hodině a jeden na doma a nikdo nemá víc než dvojnásobek úkolů než kdokoli jiný.</p>
-      <h3 class="uk-h">V hodině E1</h3><ul class="uk-list">${UKOLY.filter((x) => x.kde === "hodina").map(radek).join("")}</ul>
-      <h3 class="uk-h">Doma do neděle 29. 11.</h3><ul class="uk-list">${UKOLY.filter((x) => x.kde === "doma").map(radek).join("")}</ul>
-      <p class="hint">V hodině 4.6 píšou zdůvodnění do kalkulačky všichni členové, předseda je kontroluje.</p>
-      <table class="uk-souhrn"><thead><tr><th>Člen</th><th>V hodině</th><th>Doma</th></tr></thead>
-        <tbody>${cl.map((c) => `<tr><td>${esc(c.jmeno)}</td><td class="${kon.pocty[c.id].hodina ? "" : "c-bad"}">${kon.pocty[c.id].hodina}</td><td class="${kon.pocty[c.id].doma ? "" : "c-bad"}">${kon.pocty[c.id].doma}</td></tr>`).join("")}</tbody></table>
+      <h2 class="uk-h">V hodině E1</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "hodina").map(radek).join("")}</ul>
+      <h2 class="uk-h">Doma do neděle 29. 11.</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "doma").map(radek).join("")}</ul>
+      <h2 class="uk-h">V hodině 4.6 (příští týden)</h2>
+      <ul class="uk-list"><li class="uk-r"><span class="uk-t">Zdůvodnění odpovědí do kalkulačky<span class="uk-vaha">20 % hodnocení strany</span></span><span class="uk-jm"><b class="uk-vsichni">všichni</b></span></li></ul>
+      <table class="uk-souhrn"><thead><tr><th>Člen</th><th>V hodině E1</th><th>Doma</th></tr></thead>
+        <tbody>${cl.map((c) => `<tr><td>${esc(c.jmeno)}${c.id === s.p.predseda ? ` <span class="k-pred">${PREDSEDA}</span>` : ""}</td><td class="${kon.pocty[c.id].hodina ? "" : "c-bad"}">${kon.pocty[c.id].hodina}</td><td class="${kon.pocty[c.id].doma ? "" : "c-bad"}">${kon.pocty[c.id].doma}</td></tr>`).join("")}</tbody></table>
       ${kon.chyby.length ? `<ul class="uk-chyby" role="status">${kon.chyby.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : '<p class="uk-ok" role="status">Rozdělení splňuje pravidla.</p>'}`;
   }
-  const PREDSEDA = "předseda/předsedkyně strany";
 
   /* Kontrola pravidel rozdělení: u každého (povinného) úkolu jméno, každý člen aspoň 1 úkol
      v hodině a 1 doma, nikdo nemá víc než dvojnásobek úkolů než kdokoli jiný. */
@@ -46,10 +44,10 @@
     cl.forEach((c) => (pocty[c.id] = { hodina: 0, doma: 0 }));
     UKOLY.forEach((x) => (u[x.k] || []).filter((id) => ids.has(id)).forEach((id) => pocty[id][x.kde]++));
     const chyby = [];
-    const bez = UKOLY.filter((x) => !x.volitelny && !(u[x.k] || []).some((id) => ids.has(id)));
+    const bez = UKOLY.filter((x) => !(u[x.k] || []).some((id) => ids.has(id)));
     if (bez.length) chyby.push(`Bez jména: ${bez.map((x) => x.t).join(", ")}.`);
     const bezH = cl.filter((c) => !pocty[c.id].hodina), bezD = cl.filter((c) => !pocty[c.id].doma);
-    if (bezH.length) chyby.push(`Úkol v hodině nemá: ${bezH.map((c) => c.jmeno).join(", ")}.`);
+    if (bezH.length) chyby.push(`Úkol v hodině E1 nemá: ${bezH.map((c) => c.jmeno).join(", ")}.`);
     if (bezD.length) chyby.push(`Úkol na doma nemá: ${bezD.map((c) => c.jmeno).join(", ")}.`);
     const celk = cl.map((c) => pocty[c.id].hodina + pocty[c.id].doma);
     if (cl.length && Math.min(...celk) > 0 && Math.max(...celk) > 2 * Math.min(...celk)) chyby.push("Někdo má víc než dvojnásobek úkolů než jiný člen. Rozdělte je rovnoměrněji.");
@@ -255,7 +253,7 @@
       ${moje ? `<div class="mine" style="--pc:${esc(moje.p.barva)}">
         ${monogram(moje, "mine-logo")}
         <div><p class="mine-t">Tvoje strana: <b>${esc(moje.nazev)}</b></p><p class="mine-s">${esc(stavText(moje))}</p></div>
-        <div class="mine-a">${muzeUpravovat(moje) ? '<a class="btn" href="#strana">Upravit profil strany</a>' : ""}<a class="btn ghost" href="#strany-${moje.id}">Zobrazit profil</a></div>
+        <div class="mine-a">${muzeUpravovat(moje) ? '<a class="btn" href="#strana">Upravit profil strany</a>' : ""}<a class="btn ghost" href="#ukoly">Rozdělení úkolů</a><a class="btn ghost" href="#strany-${moje.id}">Zobrazit profil</a></div>
       </div>` : ""}
       <p class="kalk-link"><a class="btn ghost" href="#kalkulacka">Volební kalkulačka</a></p>
       <div class="toolbar">
@@ -407,9 +405,9 @@
       ${lze ? "" : '<p class="locked">Profil je uzamčený, úpravy už nejdou uložit. Pokud potřebujete něco opravit, řekněte učiteli.</p>'}
       <div class="ed-grid">
         <nav class="ed-nav" aria-label="Části profilu">
-          <ul>${[["zaklad", "Název a logo"], ["osy", "Pozice na osách"], ["program", "3 priority"], ["zakon", "Vlajkový zákon"], ["kandidatka", "Kandidátka a předseda"], ["ukoly", "Rozdělení úkolů"], ["kampan", "Plakát a spot"]].map((x) => `<li><a href="#strana${jeUcitel() ? "-" + s.id : ""}" data-jump="${x[0]}">${x[1]}</a></li>`).join("")}</ul>
+          <ul>${[["zaklad", "Název a logo"], ["osy", "Pozice na osách"], ["program", "3 priority"], ["zakon", "Vlajkový zákon"], ["kandidatka", "Kandidátka a předseda"], ["kampan", "Plakát a spot"]].map((x) => `<li><a href="#strana${jeUcitel() ? "-" + s.id : ""}" data-jump="${x[0]}">${x[1]}</a></li>`).join("")}</ul>
           <div class="ed-check"><p>Hotovo ${h.filter((x) => x[1]).length} ze ${h.length}</p><ul id="checklist">${checklist(h)}</ul>
-          <p><a class="btn small ghost" href="#kalkulacka-strana">Odpovědi do kalkulačky</a></p></div>
+          <p class="ed-links"><a class="btn small ghost" href="#ukoly${jeUcitel() ? "-" + s.id : ""}">Rozdělení úkolů</a><a class="btn small ghost" href="#kalkulacka-strana">Odpovědi do kalkulačky</a></p></div>
         </nav>
         <div class="ed-forms">
           <section class="ed-sec" id="sec-zaklad"><h2>Název a logo</h2>
@@ -463,10 +461,6 @@
             <div class="fld k-predseda"><label for="f-predseda">Předseda/předsedkyně strany</label>
               <select id="f-predseda" data-predseda${dis}><option value="">Vyberte…</option>${cl.map((c) => `<option value="${c.id}"${c.id === p.predseda ? " selected" : ""}>${esc(c.jmeno)}</option>`).join("")}</select>
               <p class="hint">Jediná pevná funkce před volbami. Řídí rozhodování strany v hodině, při neshodě rozhoduje a kontroluje, že zdůvodnění v kalkulačce sedí s programem.</p></div>` : '<p class="muted">Strana zatím nemá členy. Do stran žáky zařazuje učitel.</p>'}
-          </section>
-
-          <section class="ed-sec" id="sec-ukoly"><h2>Rozdělení úkolů</h2>
-            ${ukolySekce(s, cl, dis)}
           </section>
 
           <section class="ed-sec" id="sec-kampan"><h2>Plakát a spot</h2>
@@ -595,13 +589,7 @@
       // spolu s předsedou se uloží i aktuální pořadí kandidátky
       if (await ulozSloupec(s, { predseda: pred.value || null, kandidatka: kList() })) kresliEditorZachovej(s, "sec-kandidatka");
     });
-    root.querySelectorAll(".chipzak[data-ukol]").forEach((b) => b.addEventListener("click", async () => {
-      const u = JSON.parse(JSON.stringify(s.p.ukoly || {})), k = b.dataset.ukol, id = b.dataset.zak;
-      const arr = u[k] || [];
-      u[k] = arr.includes(id) ? arr.filter((x) => x !== id) : arr.concat(id);
-      if (!u[k].length) delete u[k];
-      if (await ulozSloupec(s, "ukoly", u)) kresliEditorZachovej(s, "sec-ukoly");
-    }));
+
     const presun = async (i, j) => {
       const arr = kList(); const [it] = arr.splice(i, 1); arr.splice(j, 0, it);
       if (await ulozSloupec(s, "kandidatka", arr)) kresliEditorZachovej(s, "sec-kandidatka");
@@ -664,23 +652,62 @@
 
   // Načte změny od spolustraníků, nepřepíše rozepsaná pole
   async function obnov() {
-    if (A().currentPage() !== "strana" || document.hidden || ed.pending || ed.dirty.size) return;
+    const stranka = A().currentPage();
+    if ((stranka !== "strana" && stranka !== "ukoly") || document.hidden || ed.pending || ed.dirty.size) return;
     const act = document.activeElement;
     if (act && act.dataset && act.dataset.col) return;
     try { await nacti(); } catch (e) { return; }
     const s = najdi(ed.id);
-    if (s) kresliEditorZachovej(s);
+    if (s) { if (stranka === "ukoly") kresliUkoly(s); else kresliEditorZachovej(s); }
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden) obnov(); });
 
   window.KOMPAS = kompas;
 
+  /* ================= ROZDĚLENÍ ÚKOLŮ (samostatná stránka) ================= */
+  async function renderUkoly(arg) {
+    clearInterval(ed.timer);
+    if (!(await pripravit("Rozdělení úkolů"))) return;
+    const id = arg && jeUcitel() ? arg : mojeStrana();
+    if (!id) return hlaska("Rozdělení úkolů", jeUcitel() ? 'Vyberte stranu v <a class="inl" href="#ucitel">učitelském panelu</a> nebo na stránce <a class="inl" href="#strany">Strany</a>.' : "Do strany tě učitel zařadí v hodině 23. 11. Pak si tu úkoly rozdělíte.");
+    const s = najdi(id);
+    if (!s) return hlaska("Rozdělení úkolů", "Strana nenalezena.");
+    ed.id = id; ed.dirty.clear();
+    kresliUkoly(s);
+    ed.timer = setInterval(obnov, 20000);
+  }
+
+  function kresliUkoly(s) {
+    const lze = muzeUpravovat(s), dis = lze ? "" : " disabled", cl = clenove(s);
+    const y = window.scrollY;
+    A().main.innerHTML = `
+    <div class="wrap uk-wrap">
+      <p class="crumb"><a class="inl" href="#strana${jeUcitel() ? "-" + s.id : ""}">Profil strany</a> · <a class="inl" href="#strany-${s.id}">Zobrazit profil</a></p>
+      <div class="page-head"><div>
+        <h1>Rozdělení úkolů</h1>
+        <p class="lead">${esc(s.nazev)}. Rozdělení vidí jen vaše strana a učitel. Ukládá se samo.</p>
+      </div></div>
+      ${lze ? "" : '<p class="locked">Úpravy jsou uzamčené. Pokud potřebujete něco opravit, řekněte učiteli.</p>'}
+      ${ukolySekce(s, cl, dis)}
+      <p class="savebar" id="savebar" role="status" aria-live="polite"></p>
+    </div>`;
+    window.scrollTo(0, y);
+    A().main.querySelectorAll(".chipzak[data-ukol]").forEach((b) => b.addEventListener("click", async () => {
+      const u = JSON.parse(JSON.stringify(s.p.ukoly || {})), k = b.dataset.ukol, zid = b.dataset.zak;
+      const arr = u[k] || [];
+      u[k] = arr.includes(zid) ? arr.filter((x) => x !== zid) : arr.concat(zid);
+      if (!u[k].length) delete u[k];
+      if (await ulozSloupec(s, "ukoly", u)) kresliUkoly(s);
+    }));
+  }
+
   /* ================= REGISTRACE ================= */
   window.EXTRA_PAGES = Object.assign(window.EXTRA_PAGES || {}, {
     strany: { title: "Strany", render: renderStrany, update: renderStrany },
-    strana: { title: "Profil strany", render: renderEditor, update: renderEditor }
+    strana: { title: "Profil strany", render: renderEditor, update: renderEditor },
+    ukoly: { title: "Rozdělení úkolů", render: renderUkoly, update: renderUkoly }
   });
   document.addEventListener("DOMContentLoaded", () => {
-    if (window.SIM && window.SIM.authPages) window.SIM.authPages.push("strany", "strana");
+    if (window.SIM && window.SIM.authPages) window.SIM.authPages.push("strany", "strana", "ukoly");
   });
 })();

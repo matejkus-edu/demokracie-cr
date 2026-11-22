@@ -616,9 +616,13 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .k-pred { display: inline-block; margin-left: 6px; font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--paper); background: var(--ink); border-radius: 999px; padding: 1px 8px; vertical-align: 2px; }
 .k-predseda { margin-top: 14px; }
 .k-predseda select { font: inherit; font-family: var(--sans); font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); min-width: 240px; }
-.uk-h { font-family: var(--sans); font-size: 14px; font-weight: 700; margin: 16px 0 6px; }
+.uk-wrap { max-width: 980px; }
+.uk-h { font-family: var(--sans); font-size: 15px; font-weight: 700; margin: 22px 0 6px; }
+.uk-vaha { display: block; font-family: var(--sans); font-size: 12.5px; font-weight: 700; color: var(--jud); margin-top: 2px; }
+.uk-vsichni { font-family: var(--sans); font-size: 14px; padding-top: 3px; }
+.ed-links { display: flex; flex-wrap: wrap; gap: 6px; }
 .uk-list { list-style: none; padding: 0; margin: 0; }
-.uk-r { display: grid; grid-template-columns: minmax(160px, 260px) minmax(0, 1fr); gap: 6px 14px; align-items: start; border-top: 1px solid var(--hair); padding: 8px 0; }
+.uk-r { display: grid; grid-template-columns: minmax(200px, 320px) minmax(0, 1fr); gap: 6px 14px; align-items: start; border-top: 1px solid var(--hair); padding: 8px 0; }
 .uk-t { font-size: 15px; line-height: 1.45; padding-top: 3px; }
 .uk-jm { display: flex; flex-wrap: wrap; gap: 5px; }
 .chipzak { font-family: var(--sans); font-size: 13px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
