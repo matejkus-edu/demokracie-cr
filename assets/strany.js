@@ -292,7 +292,7 @@
     const plakat = obrazek(p.plakat_path);
     const pri = [1, 2, 3].map((i) => ({ t: p["p" + i], karta: karta1(p["p" + i + "_karta"]), smer: p["p" + i + "_smer"], popis: p["p" + i + "_popis"], proc: p["p" + i + "_proc"] }))
       .filter((x) => x.t || x.smer || x.popis);
-    const zakon = [["Jaký problém řeší", p.zakon_problem], ["Jak ho řeší", p.zakon_reseni], ["Koho se týká", p.zakon_koho], ["Kolik bude stát", p.zakon_naklady], ["Patří do pravomoci Parlamentu?", p.zakon_pravomoc]].filter((x) => x[1]);
+    const zakon = [["Jaký problém řeší", p.zakon_problem], ["Jak ho řeší", p.zakon_reseni], ["Koho se týká", p.zakon_koho], ["Kolik bude stát", p.zakon_naklady]].filter((x) => x[1]);
     A().main.innerHTML = `
     <div class="wrap">
       <p class="crumb"><a class="inl" href="#strany">Všechny strany</a></p>
@@ -446,7 +446,6 @@
             ${inp("zakon_problem", "Jaký problém řeší", { area: true })}
             ${inp("zakon_reseni", "Jak ho řeší", { area: true })}
             <div class="two">${inp("zakon_koho", "Koho se týká", { area: true, rows: 2, max: 1000 })}${inp("zakon_naklady", "Kolik bude stát a kdo to zaplatí", { area: true, rows: 2, max: 1000 })}</div>
-            ${inp("zakon_pravomoc", "Patří do pravomoci Parlamentu?", { area: true, rows: 2, max: 1000, hint: 'Může o tom rozhodnout Parlament, nebo to patří obcím, krajům či EU? Nezasahuje do práv z Listiny?' })}
             <div class="fld"><span class="lbl">Typ zákona</span><div class="radios">
               ${[["bezny", "Běžný zákon"], ["ustavni", "Ústavní zákon (mění Ústavu)"]].map((o) => `<label class="radio"><input type="radio" name="zakon_typ" value="${o[0]}" data-col="zakon_typ"${p.zakon_typ === o[0] ? " checked" : ""}${dis}> ${o[1]}</label>`).join("")}
             </div><p class="hint">Rozdíl najdete na stránce <a class="inl" href="#zakon">Cesta zákona</a>.</p></div>
