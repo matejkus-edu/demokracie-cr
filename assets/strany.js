@@ -27,7 +27,7 @@
     const u = s.p.ukoly || {}, kon = kontrolaUkolu(s);
     const radek = (x) => `<li class="uk-r"><span class="uk-t">${esc(x.t)}<span class="uk-vaha">${x.vaha ? `${x.vaha} hodnocení strany` : "povinný úkol"}</span></span>
       <span class="uk-jm">${cl.map((c) => `<button type="button" class="chipzak" data-ukol="${x.k}" data-zak="${c.id}" aria-pressed="${(u[x.k] || []).includes(c.id)}"${dis}>${esc(c.jmeno)}</button>`).join("")}</span></li>`;
-    return `<p class="hint">Přepište rozdělení z papíru z hodiny E1. U každého úkolu klikněte na jméno, může jich být víc. Pravidla: každý úkol má jméno, každý člen má aspoň jeden úkol v hodině a jeden na doma a nikdo nemá víc než dvojnásobek úkolů než kdokoli jiný.</p>
+    return `<p class="hint">U každého úkolu klikněte na jméno, může jich být víc. Pravidla: každý úkol má jméno, každý člen má aspoň jeden úkol v hodině a jeden na doma a nikdo nemá víc než dvojnásobek úkolů než kdokoli jiný.</p>
       <h2 class="uk-h">V hodině E1</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "hodina").map(radek).join("")}</ul>
       <h2 class="uk-h">Doma do neděle 29. 11.</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "doma").map(radek).join("")}</ul>
       <h2 class="uk-h">V hodině 4.6 (příští týden)</h2>
