@@ -35,7 +35,7 @@ window.HARMONOGRAM = {
       hodiny: { L1C: ["2026-11-23"], L1B: ["2026-11-24"] },
       epizody: [
         {
-          k: "E1", t: "Zakládání politických stran",
+          k: "E1", t: "Založení politických stran a tvorba programu",
           ukoly: [
             { kde: "hodina", t: "Vytvoříte týmy (každý tým je jedna strana) a zvolíte předsedu nebo předsedkyni strany." },
             { kde: "hodina", t: "Na základě vylosované pozice upřesníte ideologické ukotvení strany na dvou osách.", vaha: 10 },
@@ -52,7 +52,7 @@ window.HARMONOGRAM = {
       pozn: { L1C: "Hodina 30. 11. je suplovaná." },
       epizody: [
         {
-          k: "E1", t: "Zakládání politických stran (dokončení)",
+          k: "E1", t: "Založení politických stran a tvorba programu (dokončení programu)",
           ukoly: [
             { kde: "hodina", t: "Dokončíte 3 programové priority se zdůvodněním a konkrétním opatřením.", vaha: 20 },
             { kde: "hodina", t: "Vlajkový zákon: dokončíte ho na papír podle šablony věcného záměru. Papír s prioritami a vlajkovým zákonem vyfotíte do Classroomu.", vaha: 30 },
@@ -60,7 +60,7 @@ window.HARMONOGRAM = {
           ]
         },
         {
-          k: "E2", t: "Kalkulačka a kampaň",
+          k: "E2", t: "Kampaň a volby (kalkulačka za stranu a kampaň)",
           ukoly: [
             { kde: "hodina", t: "Odpovědi do kalkulačky: odpovíte za stranu na všech 14 výroků i se zdůvodněním (nejvýš 3 neutrální odpovědi). Co nestihnete v hodině, dokončíte doma. Po uzávěrce se odpovědi uzamknou.", vaha: 20, termin: "2026-12-06T23:59", kratce: "Odpovědi strany do kalkulačky", odkaz: ["#kalkulacka-strana", "Odpovědi do kalkulačky"] },
             { kde: "hodina", t: "Deník, zápis 1: jeden zápis za obě hodiny (zakládání strany i kalkulačka za stranu). Co nestihnete, dopíšete doma.", denik: 1, vahaZak: 15, termin: "2026-12-06T23:59", kratce: "Deník, zápis 1" },
@@ -76,7 +76,7 @@ window.HARMONOGRAM = {
       teorie: ["#volby", "Volby"],
       epizody: [
         {
-          k: "E2", t: "Volby",
+          k: "E2", t: "Kampaň a volby (cesta voliče a volby)",
           ukoly: [
             { kde: "hodina", t: "Deník, zápis 2.", denik: 2, vahaZak: 15 },
             { kde: "doma", t: "Každý individuálně projde profily a kampaně stran z paralelní třídy a vyplní hodnoticí arch kampaní.", od: "2026-12-06T23:59", termin: "2026-12-12T14:00", kratce: "Hodnoticí arch kampaní", odkaz: ["#strany", "Strany"] },
@@ -101,7 +101,7 @@ window.HARMONOGRAM = {
           ]
         },
         {
-          k: "E4", t: "Legislativní proces ve Sněmovně",
+          k: "E4", t: "Legislativní proces (Sněmovna)",
           ukoly: [
             { kde: "hodina", t: "Vláda předloží vlajkový zákon Sněmovně, 1. čtení." },
             { kde: "hodina", t: "2. čtení: opoziční strana podá aspoň jeden pozměňovací návrh, nebo vystoupí v rozpravě. 3. čtení: Sněmovna hlasuje o celém zákonu." },
@@ -117,7 +117,7 @@ window.HARMONOGRAM = {
       pozn: "Přes Vánoce leží zákon v Senátu. I ve skutečnosti má Senát na projednání zákona 30 dní.",
       epizody: [
         {
-          k: "E4", t: "Senát a prezident",
+          k: "E4", t: "Legislativní proces (Senát a prezident)",
           ukoly: [
             { kde: "hodina", t: "Senát: senátor nebo senátorka každé strany hlasuje váženým hlasem. Prezident zákon podepíše, nebo vetuje; veto může Sněmovna přehlasovat 101 hlasy." },
             { kde: "hodina", t: "Deník, zápis 4 (závěrečná reflexe).", denik: 4, vahaZak: 15 }
