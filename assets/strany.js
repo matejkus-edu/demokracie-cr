@@ -14,7 +14,7 @@
     { k: "zakon", t: "Vlajkový zákon: věcný záměr", kde: "hodina", vaha: "30 %" },
     { k: "prepis_pozice", t: "Přepis pozice a priorit do profilu na webu", kde: "doma" },
     { k: "prepis_zakon", t: "Přepis vlajkového zákona do profilu na webu", kde: "doma" },
-    { k: "texty", t: "Název a texty profilu (včetně sloganu)", kde: "doma" },
+    { k: "texty", t: "Název a texty profilu", kde: "doma" },
     { k: "logo", t: "Logo", kde: "doma" },
     { k: "plakat", t: "Plakát, volitelně i volební spot (do 2 min)", kde: "doma", vaha: "20 %" },
     { k: "kandidatka", t: "Kandidátní listina na web", kde: "doma" }
