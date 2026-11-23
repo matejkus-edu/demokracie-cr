@@ -56,15 +56,14 @@ window.HARMONOGRAM = {
           ukoly: [
             { kde: "hodina", t: "Dokončíte 3 programové priority se zdůvodněním a konkrétním opatřením.", vaha: 20 },
             { kde: "hodina", t: "Vlajkový zákon: dokončíte ho na papír podle šablony věcného záměru. Papír s prioritami a vlajkovým zákonem vyfotíte do Classroomu.", vaha: 30 },
-            { kde: "hodina", t: "Priority a vlajkový zákon přepíšete do profilu strany (podle rozdělení úkolů).", odkaz: ["#strana", "Profil strany"] },
-            { kde: "hodina", t: "Deník, zápis 1 (zakládání strany). Píšete ho v kuse se zápisem 2, co nestihnete, dopíšete doma.", denik: 1, vahaZak: 15, termin: "2026-12-06T23:59" }
+            { kde: "hodina", t: "Priority a vlajkový zákon přepíšete do profilu strany (podle rozdělení úkolů).", odkaz: ["#strana", "Profil strany"] }
           ]
         },
         {
           k: "E2", t: "Kalkulačka a kampaň",
           ukoly: [
             { kde: "hodina", t: "Odpovědi do kalkulačky: odpovíte za stranu na všech 14 výroků i se zdůvodněním (nejvýš 3 neutrální odpovědi). Co nestihnete v hodině, dokončíte doma. Po uzávěrce se odpovědi uzamknou.", vaha: 20, termin: "2026-12-06T23:59", kratce: "Odpovědi strany do kalkulačky", odkaz: ["#kalkulacka-strana", "Odpovědi do kalkulačky"] },
-            { kde: "hodina", t: "Deník, zápis 2 (kalkulačka za stranu). Co nestihnete, dopíšete doma.", denik: 2, vahaZak: 15, termin: "2026-12-06T23:59", kratce: "Deník, zápisy 1 a 2" },
+            { kde: "hodina", t: "Deník, zápis 1: jeden zápis za obě hodiny (zakládání strany i kalkulačka za stranu). Co nestihnete, dopíšete doma.", denik: 1, vahaZak: 15, termin: "2026-12-06T23:59", kratce: "Deník, zápis 1" },
             { kde: "doma", t: "Profil strany na webu: vyplníte všechny povinné součásti (název, logo, slogan, bod na osách, 3 programové priority, vlajkový zákon, kandidátní listina, předseda a rozdělení úkolů). Pozici, priority a vlajkový zákon přepíšete z papíru z hodiny. Úkoly na doma plní ten, komu připadly při rozdělení.", termin: "2026-12-06T23:59", kratce: "Profil strany na webu", odkaz: ["#strana", "Profil strany"] },
             { kde: "doma", t: "Kampaň: povinně plakát, volitelně volební spot (do 2 min), který může hodnocení výrazně zlepšit. Obojí nahrajete do profilu strany.", vaha: 20, termin: "2026-12-06T23:59", kratce: "Plakát (a volitelně spot)", odkaz: ["#strana", "Profil strany"] }
           ]
@@ -79,6 +78,7 @@ window.HARMONOGRAM = {
         {
           k: "E2", t: "Volby",
           ukoly: [
+            { kde: "hodina", t: "Deník, zápis 2.", denik: 2, vahaZak: 15 },
             { kde: "doma", t: "Každý individuálně projde profily a kampaně stran z paralelní třídy a vyplní hodnoticí arch kampaní.", od: "2026-12-06T23:59", termin: "2026-12-12T14:00", kratce: "Hodnoticí arch kampaní", odkaz: ["#strany", "Strany"] },
             { kde: "doma", t: "Každý individuálně vyplní volební kalkulačku jako volič.", od: "2026-12-06T23:59", termin: "2026-12-12T14:00", kratce: "Kalkulačka jako volič", odkaz: ["#kalkulacka-volic", "Kalkulačka"] },
             { kde: "doma", t: "Každý individuálně odvolí: dá hlas jedné straně z paralelní třídy a na lístku uvede, se kterou stranou mu v kalkulačce vyšla největší shoda.", od: "2026-12-11T14:00", termin: "2026-12-12T14:00", kratce: "Volby", volby: true }
