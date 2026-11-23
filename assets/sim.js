@@ -242,7 +242,7 @@
           const tm = d(termin), h0 = x.hodiny.length ? d(x.hodiny[x.hodiny.length - 1]) : null;
           t += h0 && stejnyDen(tm, h0) ? `, uzávěrka ve ${cas(tm)}` : `, uzávěrka ${kdy(tm)}`;
         }
-        if (u.denik) t += ", dopsat lze do 20:00";
+        if (u.denik && !termin) t += ", dopsat lze do 20:00";
         return t;
       }
       if (od && termin) return `od ${kdy(d(od))} do ${kdy(d(termin))}`;

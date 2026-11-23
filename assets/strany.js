@@ -25,14 +25,15 @@
   function ukolySekce(s, cl, dis) {
     if (!cl.length) return '<p class="muted">Strana zatím nemá členy. Do stran žáky zařazuje učitel.</p>';
     const u = s.p.ukoly || {}, kon = kontrolaUkolu(s);
+    const hod = s.trida === "L1C" ? "23. 11. a 30. 11." : "24. 11. a 1. 12.", hod2 = s.trida === "L1C" ? "30. 11." : "1. 12.";
     const radek = (x) => `<li class="uk-r"><span class="uk-t">${esc(x.t)}<span class="uk-vaha">${x.vaha ? `${x.vaha} hodnocení strany` : "povinný úkol"}</span></span>
       <span class="uk-jm">${cl.map((c) => `<button type="button" class="chipzak" data-ukol="${x.k}" data-zak="${c.id}" aria-pressed="${(u[x.k] || []).includes(c.id)}"${dis}>${esc(c.jmeno)}</button>`).join("")}</span></li>`;
     return `<p class="hint">U každého úkolu klikněte na jméno, může jich být víc. Pravidla: každý úkol má jméno, každý člen má aspoň jeden úkol v hodině a jeden na doma a nikdo nemá víc než dvojnásobek úkolů než kdokoli jiný.</p>
-      <h2 class="uk-h">V hodině E1</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "hodina").map(radek).join("")}</ul>
-      <h2 class="uk-h">Doma do neděle 29. 11.</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "doma").map(radek).join("")}</ul>
-      <h2 class="uk-h">V hodině 4.6 (příští týden)</h2>
+      <h2 class="uk-h">V hodinách ${hod}</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "hodina").map(radek).join("")}</ul>
+      <h2 class="uk-h">Doma do neděle 6. 12.</h2><ul class="uk-list">${UKOLY.filter((x) => x.kde === "doma").map(radek).join("")}</ul>
+      <h2 class="uk-h">Kalkulačka za stranu: v hodině ${hod2}, dokončit doma do neděle 6. 12.</h2>
       <ul class="uk-list"><li class="uk-r"><span class="uk-t">Zdůvodnění odpovědí do kalkulačky<span class="uk-vaha">20 % hodnocení strany</span></span><span class="uk-jm"><b class="uk-vsichni">všichni</b></span></li></ul>
-      <table class="uk-souhrn"><thead><tr><th>Člen</th><th>V hodině E1</th><th>Doma</th></tr></thead>
+      <table class="uk-souhrn"><thead><tr><th>Člen</th><th>V hodině</th><th>Doma</th></tr></thead>
         <tbody>${cl.map((c) => `<tr><td>${esc(c.jmeno)}${c.id === s.p.predseda ? ` <span class="k-pred">${PREDSEDA}</span>` : ""}</td><td class="${kon.pocty[c.id].hodina ? "" : "c-bad"}">${kon.pocty[c.id].hodina}</td><td class="${kon.pocty[c.id].doma ? "" : "c-bad"}">${kon.pocty[c.id].doma}</td></tr>`).join("")}</tbody></table>
       ${kon.chyby.length ? `<ul class="uk-chyby" role="status">${kon.chyby.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : '<p class="uk-ok" role="status">Rozdělení splňuje pravidla.</p>'}`;
   }
@@ -48,7 +49,7 @@
     const bez = UKOLY.filter((x) => !(u[x.k] || []).some((id) => ids.has(id)));
     if (bez.length) chyby.push(`Bez jména: ${bez.map((x) => x.t).join(", ")}.`);
     const bezH = cl.filter((c) => !pocty[c.id].hodina), bezD = cl.filter((c) => !pocty[c.id].doma);
-    if (bezH.length) chyby.push(`Úkol v hodině E1 nemá: ${bezH.map((c) => c.jmeno).join(", ")}.`);
+    if (bezH.length) chyby.push(`Úkol v hodině nemá: ${bezH.map((c) => c.jmeno).join(", ")}.`);
     if (bezD.length) chyby.push(`Úkol na doma nemá: ${bezD.map((c) => c.jmeno).join(", ")}.`);
     const celk = cl.map((c) => pocty[c.id].hodina + pocty[c.id].doma);
     if (cl.length && Math.min(...celk) > 0 && Math.max(...celk) > 2 * Math.min(...celk)) chyby.push("Někdo má víc než dvojnásobek úkolů než jiný člen. Rozdělte je rovnoměrněji.");
@@ -253,7 +254,7 @@
     <div class="wrap">
       <div class="page-head"><div>
         <h1>Strany</h1>
-        <p class="lead">Profily stran, které kandidují ve volbách 4.–5. 12. L1B volí strany z L1C a L1C strany z L1B.</p>
+        <p class="lead">Profily stran, které kandidují ve volbách 11.–12. 12. L1B volí strany z L1C a L1C strany z L1B.</p>
       </div></div>
       ${moje ? `<div class="mine" style="--pc:${esc(moje.p.barva)}">
         ${monogram(moje, "mine-logo")}

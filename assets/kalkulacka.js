@@ -47,7 +47,7 @@
   const uzTridy = (t) => k.uzaverky[t] || null;
   const uzavreno = (t) => !!uzTridy(t) && new Date() >= uzTridy(t);
   const paralelniK = (t) => TRIDY.find((x) => x !== t);
-  // kalkulačku za stranu zpřístupní učitel ručně (v hodině 4.6)
+  // kalkulačku za stranu zpřístupní učitel ručně (na začátku hodiny 30. 11. / 1. 12.)
   const proStrany = (t) => !!k.otevreno[t];
   const odpStrany = (id) => k.odpovedi.filter((x) => x.strana_id === id);
   const odp1 = (id, c) => k.odpovedi.find((x) => x.strana_id === id && x.cislo === c);
@@ -93,7 +93,7 @@
     if (!S().profil) return hlaska("Volební kalkulačka", 'Kalkulačku vyplníš po přihlášení kódem z lístečku. <a class="inl" href="#ucet">Přihlásit se</a>');
     try { await nacti(jeUcitel()); } catch (e) { return hlaska("Volební kalkulačka", "Nepodařilo se načíst: " + esc(e.message)); }
     const ja = S().profil;
-    const zatimNe = () => hlaska("Volební kalkulačka", "Kalkulačku za stranu vyplníte společně v hodině 4.6. Učitel ji zpřístupní na začátku hodiny.");
+    const zatimNe = () => hlaska("Volební kalkulačka", "Kalkulačku za stranu začnete vyplňovat společně v hodině 30. 11. (L1C) a 1. 12. (L1B). Učitel ji zpřístupní na začátku hodiny.");
     if (arg === "strana") {
       if (!jeUcitel() && ja.strana_id) { const s = k.strany.find((x) => x.id === ja.strana_id); if (s && !proStrany(ja.trida) && s.stav_kalk !== "odemceno") return zatimNe(); }
       return editorStrany(jeUcitel() ? null : ja.strana_id);
@@ -323,7 +323,7 @@
         <span class="p-stav" id="kk-stav" role="status"></span>
       </div>
       <div class="kk-uz">
-        <label class="kk-zpr"><input type="checkbox" id="kk-zpr"${proStrany(tU) ? " checked" : ""}> <span><b>Zpřístupnit kalkulačku stranám ${tU}</b><br><span class="muted">${proStrany(tU) ? "Strany z " + tU + " teď kalkulačku vidí a mohou odpovídat." : "Strany z " + tU + " kalkulačku zatím nevidí. Zapněte to na začátku hodiny 4.6."}</span></span></label>
+        <label class="kk-zpr"><input type="checkbox" id="kk-zpr"${proStrany(tU) ? " checked" : ""}> <span><b>Zpřístupnit kalkulačku stranám ${tU}</b><br><span class="muted">${proStrany(tU) ? "Strany z " + tU + " teď kalkulačku vidí a mohou odpovídat." : "Strany z " + tU + " kalkulačku zatím nevidí. Zapněte to na začátku hodiny " + (tU === "L1C" ? "30. 11." : "1. 12.") + "."}</span></span></label>
         <label class="uzaverka"><span>Uzávěrka odpovědí stran ${tU}</span><input type="datetime-local" id="kk-uz" value="${lokal(uzTridy(tU))}"></label>
         <button type="button" class="btn small ghost" id="kk-uz-ted"${uzavreno(tU) ? " disabled" : ""}>Uzavřít odpovědi ${tU} teď</button>
         <p class="kk-uz-stav">${uzTridy(tU) ? (uzavreno(tU) ? `<b>Uzavřeno</b> od ${esc(kdy(uzTridy(tU)))}. Voliči z ${paralelniK(tU)} kalkulačku vyplňují.` : `<b>Uzávěrka</b> ${esc(kdy(uzTridy(tU)))}. Pak se odpovědi stran uzamknou a kalkulačka se otevře voličům z ${paralelniK(tU)}.`) : "Uzávěrka není nastavená, odpovědi jsou otevřené."}</p>
