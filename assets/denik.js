@@ -47,26 +47,34 @@
     return out;
   }
 
+  /* Otázky zápisů vrací databázová funkce denik_otazky: žákovi až od začátku hodiny, kdy se zápis
+     jeho třídě otevírá (nebo s výjimkou / když už zápis začal psát), učiteli vždy. */
+  function sOtazkami(zapisy, ot) {
+    const m = new Map((ot || []).map((x) => [x.cislo, x.otazky]));
+    return (zapisy || []).map((x) => Object.assign(x, { otazky: m.has(x.cislo) ? m.get(x.cislo) || [] : null }));
+  }
+
   /* ================= ŽÁK: MŮJ DENÍK ================= */
-  const z = { zapisy: [], terminy: [], moje: [], vyjimky: [], vybrany: null, timer: null, ukladam: 0, cekajici: false };
+  const z = { zapisy: [], terminy: [], moje: [], vyjimky: [], vybrany: null, timer: null, otevri: null, ukladam: 0, cekajici: false };
 
   async function nactiZaka() {
     const c = S().client, ja = S().profil;
-    const [a, b, e, f] = await Promise.all([
-      c.from("denik_zapisy").select("cislo, nazev, uvod, otazky").order("cislo"),
+    const [a, b, e, f, g] = await Promise.all([
+      c.from("denik_zapisy").select("cislo, nazev, uvod").order("cislo"),
       c.from("denik_terminy").select("cislo, trida, hodina_od, hodina_do, uzaverka").eq("trida", ja.trida),
       c.from("denik").select("*").eq("zak_id", ja.id),
-      c.from("denik_vyjimky").select("cislo, do_kdy").eq("zak_id", ja.id)
+      c.from("denik_vyjimky").select("cislo, do_kdy").eq("zak_id", ja.id),
+      c.rpc("denik_otazky")
     ]);
     if (a.error) throw new Error(a.error.message);
-    z.zapisy = a.data || []; z.terminy = b.data || []; z.moje = e.data || []; z.vyjimky = f.data || [];
+    z.zapisy = sOtazkami(a.data, g.data); z.terminy = b.data || []; z.moje = e.data || []; z.vyjimky = f.data || [];
   }
   const tZ = (c) => z.terminy.find((t) => t.cislo === c);
   const rZ = (c) => z.moje.find((r) => r.cislo === c);
   const vZ = (c) => z.vyjimky.find((v) => v.cislo === c);
 
   async function renderDenik(arg) {
-    clearTimeout(z.timer);
+    clearTimeout(z.timer); clearTimeout(z.otevri);
     if (!S().ready) return hlaska("Deník aktéra", "Načítám…");
     if (!S().profil) return hlaska("Deník aktéra", 'Do deníku se dostaneš po přihlášení kódem z lístečku. <a class="inl" href="#ucet">Přihlásit se</a>');
     if (S().profil.ucitel) { location.replace("#deniky"); return; }
@@ -113,6 +121,13 @@
       </div>` : '<div class="empty-state"><h2>Zatím žádné zápisy</h2><p>Zápisy se objeví, až je učitel připraví.</p></div>'}
     </div>`;
     if (zap) bindZapis(zap);
+    // stránka otevřená před začátkem hodiny se sama obnoví, jakmile se zápis otevře
+    if (zap) {
+      const s = stav(rZ(zap.cislo), tZ(zap.cislo), vZ(zap.cislo), now);
+      if (s.k === "ceka" && s.od - now < 12 * 3600 * 1000) {
+        z.otevri = setTimeout(() => { if (A().currentPage() === "denik") renderDenik(String(zap.cislo)); }, s.od - now + 1500);
+      }
+    }
   }
 
   function zaloha(c) { try { return JSON.parse(localStorage.getItem("denik-zaloha-" + S().profil.id + "-" + c) || "null"); } catch (e) { return null; } }
@@ -127,12 +142,12 @@
     if (s.otevreno) {
       const z0 = zaloha(zap.cislo);
       const maZalohu = z0 && JSON.stringify(z0) !== JSON.stringify(odp);
-      const vse = zap.otazky.every((q) => (odp[q.id] || "").trim());
+      const vse = (zap.otazky || []).every((q) => (odp[q.id] || "").trim());
       return `${hlavicka}
         <p class="dn-okno">${s.odev ? `Odevzdáno ${esc(kdy(s.odev))}. ` : ""}Psát a upravovat můžeš do ${esc(kdyKratce(s.konec))}. Vše se průběžně ukládá.</p>
         ${maZalohu ? `<p class="dn-zaloha">V tomto prohlížeči je uložená novější verze, která se nestihla odeslat. <button type="button" class="mini" id="obnovit">Vložit ji do zápisu</button></p>` : ""}
         <form id="dn-form" novalidate>
-          ${zap.otazky.map((q, i) => `<div class="dn-q">
+          ${(zap.otazky || []).map((q, i) => `<div class="dn-q">
             <label for="q-${esc(q.id)}"><span class="dn-qn">${i + 1}.</span> ${esc(q.text)}</label>
             ${q.napoveda ? `<p class="hint">${esc(q.napoveda)}</p>` : ""}
             <textarea id="q-${esc(q.id)}" data-q="${esc(q.id)}" rows="4" maxlength="5000">${esc(odp[q.id] || "")}</textarea>
@@ -147,14 +162,14 @@
     }
 
     if (r) {
-      const qs = r.otazky && r.otazky.length ? r.otazky : zap.otazky;
+      const qs = r.otazky && r.otazky.length ? r.otazky : zap.otazky || [];
       return `${hlavicka}
         <p class="dn-okno">${s.odev ? `Odevzdáno ${esc(kdy(s.odev))}.` : "Zápis nebyl odevzdán, uložila se rozepsaná verze."} Psaní je uzavřené.</p>
         <div class="dn-read">${qs.map((q, i) => `<section><h3><span class="dn-qn">${i + 1}.</span> ${esc(q.text)}</h3>${(odp[q.id] || "").trim() ? `<p>${esc(odp[q.id])}</p>` : '<p class="muted">Bez odpovědi.</p>'}</section>`).join("")}</div>
         ${komentar}`;
     }
 
-    if (s.k === "ceka") return `${hlavicka}<p class="dn-okno">Zápis se otevře ${esc(kdy(s.od))}, v hodině.</p><div class="dn-preview"><p class="hint">Otázky, na které budeš odpovídat:</p><ol>${zap.otazky.map((q) => `<li>${esc(q.text)}</li>`).join("")}</ol></div>`;
+    if (s.k === "ceka") return `${hlavicka}<p class="dn-okno">Zápis se otevře ${esc(kdy(s.od))}, v hodině. Otázky uvidíš, až se zápis otevře.</p>`;
     if (s.k === "chybi") return `${hlavicka}<p class="dn-okno warn">Tenhle zápis jsi neodevzdal(a). Pokud jsi v hodině chyběl(a), napíšeš náhradní zápis do 7 dnů. Řekni učiteli, ať ti ho otevře.</p>`;
     return `${hlavicka}<p class="dn-okno">Termín zápisu zatím není nastavený.</p>`;
   }
@@ -167,7 +182,7 @@
     pole.forEach(auto);
     const sber = () => { const o = {}; pole.forEach((el) => { if (el.value.trim()) o[el.dataset.q] = el.value; }); return o; };
     const kontrola = () => {
-      const vse = zap.otazky.every((q) => { const el = f.querySelector(`[data-q="${q.id}"]`); return el && el.value.trim(); });
+      const vse = (zap.otazky || []).every((q) => { const el = f.querySelector(`[data-q="${q.id}"]`); return el && el.value.trim(); });
       const b = document.getElementById("odevzdat"), r = rZ(zap.cislo);
       b.disabled = !vse || !!(r && r.odevzdano_at);
       document.getElementById("dn-chybi").textContent = vse ? "" : "Odevzdat můžeš, až odpovíš na všechny otázky.";
@@ -219,16 +234,17 @@
 
   async function nactiUcitel() {
     const c = S().client;
-    const [a, b, e, f, g] = await Promise.all([
+    const [a, b, e, f, g, h] = await Promise.all([
       c.from("zaci").select("id, jmeno, trida, strana_id, role_ve_strane, strany(nazev)").eq("ucitel", false).order("jmeno"),
-      c.from("denik_zapisy").select("*").order("cislo"),
+      c.from("denik_zapisy").select("cislo, nazev, uvod, updated_at").order("cislo"),
       c.from("denik_terminy").select("*"),
       c.from("denik").select("*"),
-      c.from("denik_vyjimky").select("*")
+      c.from("denik_vyjimky").select("*"),
+      c.rpc("denik_otazky")
     ]);
-    const err = [a, b, e, f, g].find((x) => x.error);
+    const err = [a, b, e, f, g, h].find((x) => x.error);
     if (err) throw new Error(err.error.message);
-    u.zaci = a.data; u.zapisy = b.data; u.terminy = e.data; u.denik = f.data; u.vyjimky = g.data;
+    u.zaci = a.data; u.zapisy = sOtazkami(b.data, h.data).map((x) => Object.assign(x, { otazky: x.otazky || [] })); u.terminy = e.data; u.denik = f.data; u.vyjimky = g.data;
   }
   const tU = (c, tr) => u.terminy.find((t) => t.cislo === c && t.trida === tr);
   const rU = (zak, c) => u.denik.find((r) => r.zak_id === zak && r.cislo === c);
