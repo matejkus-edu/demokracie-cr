@@ -9,7 +9,7 @@ window.VOLBY = [
     big: "200",
     bigLabel: "poslanců na 4 roky",
     system: "poměrný",
-    lead: "Nejdůležitější volby v Česku: z jejich výsledku vzniká vláda.",
+    lead: "Nejdůležitější volby v ČR: z jejich výsledku vzniká vláda.",
     facts: [
       ["Kolik", "200 poslanců"],
       ["Na jak dlouho", "4 roky (dřív, pokud prezident Sněmovnu rozpustí)"],
@@ -150,9 +150,9 @@ window.VOLBY = [
     big: "21",
     bigLabel: "europoslanců na 5 let",
     system: "poměrný",
-    lead: "Česko volí 21 z 720 poslanců Evropského parlamentu. Nejde o českou instituci, ale o parlament Evropské unie.",
+    lead: "Česká republika volí 21 z 720 poslanců Evropského parlamentu. Nejde o českou instituci, ale o parlament Evropské unie.",
     facts: [
-      ["Kolik", "21 europoslanců za Česko"],
+      ["Kolik", "21 europoslanců za ČR"],
       ["Na jak dlouho", "5 let"],
       ["Kdo může volit", "občan ČR od 18 let a občan jiné země EU s pobytem v ČR, pokud je zapsaný v seznamu voličů"],
       ["Kdo může kandidovat", "od 21 let"],

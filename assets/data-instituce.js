@@ -186,7 +186,7 @@ window.INST = {
       "Rozhoduje o ústavních stížnostech: kdo si myslí, že mu stát nebo soud porušil základní práva, se na něj může obrátit (většinou až když neuspěje u ostatních soudů).",
       "Rozhoduje o ústavní žalobě Senátu na prezidenta.",
       "Řeší spory státních orgánů o to, komu patří jaká pravomoc.",
-      "Posuzuje některé mezinárodní smlouvy ještě před tím, než je Česko přijme."
+      "Posuzuje některé mezinárodní smlouvy ještě před tím, než je ČR přijme."
     ],
     stop: [
       "Prakticky nikdo. Jeho rozhodnutí (nálezy) jsou závazná pro všechny, i pro Parlament, vládu a prezidenta, a nikdo je nemůže přehlasovat.",
@@ -334,7 +334,7 @@ window.INST = {
       "Zakládají politické strany, spolky a občanské iniciativy.",
       "Podávají petice a pořádají shromáždění. Shromáždění se úřadu jen oznamuje, nepovoluje se (Listina, čl. 19).",
       "Kdo má za to, že mu stát porušil základní práva, může podat ústavní stížnost k [[us|Ústavnímu soudu]].",
-      "Mohou hlasovat v místním nebo krajském referendu. Celostátní referendum Česko obecně upravené nemá."
+      "Mohou hlasovat v místním nebo krajském referendu. Celostátní referendum ČR obecně upravené nemá."
     ],
     stop: [
       "Ústava chrání práva menšin: o základních právech nerozhoduje většina hlasů (čl. 6 Ústavy, Listina základních práv a svobod)."
@@ -346,7 +346,7 @@ window.INST = {
     name: "Obce",
     power: "local",
     core: true,
-    lead: "Základní územní samosprávné celky. V Česku je přes 6 200 obcí, od malých vesnic po Prahu.",
+    lead: "Základní územní samosprávné celky. V ČR je přes 6 200 obcí, od malých vesnic po Prahu.",
     facts: [
       ["Kdo rozhoduje", "zastupitelstvo obce, které volí občané ([[volby/obce|obecní volby]])"],
       ["Starosta", "volí ho zastupitelstvo ze svých členů, spolu s radou obce"],
@@ -368,7 +368,7 @@ window.INST = {
     name: "Kraje",
     power: "local",
     core: true,
-    lead: "Vyšší územní samosprávné celky. Česko má 14 krajů. Praha je obec i kraj zároveň.",
+    lead: "Vyšší územní samosprávné celky. Česká republika má 14 krajů. Praha je obec i kraj zároveň.",
     facts: [
       ["Kdo rozhoduje", "zastupitelstvo kraje, které volí občané ([[volby/kraje|krajské volby]]); v Praze zastupitelstvo hlavního města"],
       ["Hejtman", "volí ho zastupitelstvo kraje, spolu s radou kraje"],

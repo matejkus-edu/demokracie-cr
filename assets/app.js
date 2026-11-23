@@ -149,7 +149,7 @@
       <div class="page-head">
         <div>
           <h1>Dělba moci</h1>
-          <p class="lead">Kdo v Česku jakou moc drží, jak se do funkce dostane a kdo ho může zastavit. Klikni na instituci nebo na šipku.</p>
+          <p class="lead">Kdo v ČR jakou moc drží, jak se do funkce dostane a kdo ho může zastavit. Klikni na instituci nebo na šipku.</p>
         </div>
       </div>
       <div class="toolbar" role="group" aria-label="Nastavení schématu">
@@ -504,7 +504,7 @@
     <div class="wrap">
       <div class="page-head"><div>
         <h1>Volby</h1>
-        <p class="lead">Kam všude v Česku volíme, podle jakých pravidel a co z voleb vzejde. Vyber volby a uvidíš podrobnosti.</p>
+        <p class="lead">Kam všude v ČR volíme, podle jakých pravidel a co z voleb vzejde. Vyber volby a uvidíš podrobnosti.</p>
       </div></div>
       <div class="ballots" role="tablist" aria-label="Druhy voleb">
         ${VOLBY.map((v) => `<a class="ballot b-${v.power}" role="tab" href="#volby-${v.id}" data-id="${v.id}"><b>${esc(v.name)}</b><span>${esc(v.big)} ${esc(v.bigLabel)}</span><span>${esc(v.system)} systém</span></a>`).join("")}
@@ -526,7 +526,7 @@
 
     <section class="section"><div class="wrap">
       <h2>Poměrný, nebo většinový systém?</h2>
-      <p class="sub">Obě rodiny volebních systémů mají své výhody. Česko používá obě: do Senátu a na prezidenta většinový, všude jinde poměrný.</p>
+      <p class="sub">Obě rodiny volebních systémů mají své výhody. ČR používá obě: do Senátu a na prezidenta většinový, všude jinde poměrný.</p>
       <div class="compare">
         <div class="cmp"><h3>Poměrný systém</h3><p class="tag">Sněmovna, kraje, obce, Evropský parlament</p><dl>
           <dt>Jak funguje</dt><dd>Strany dostanou zhruba tolik procent křesel, kolik procent hlasů získaly. Obvody mají víc mandátů.</dd>
@@ -534,7 +534,7 @@
           <dt>Nevýhody</dt><dd>Často vzniká mnoho stran, vláda musí být koaliční a voliči předem nevědí, jaká vláda z jejich hlasu vzejde.</dd>
         </dl></div>
         <div class="cmp"><h3>Většinový systém</h3><p class="tag">Senát, prezident</p><dl>
-          <dt>Jak funguje</dt><dd>V každém obvodu se volí jeden zástupce a vyhrává ten, kdo má nejvíc hlasů, v Česku nadpoloviční většinu, případně ve druhém kole.</dd>
+          <dt>Jak funguje</dt><dd>V každém obvodu se volí jeden zástupce a vyhrává ten, kdo má nejvíc hlasů, v ČR nadpoloviční většinu, případně ve druhém kole.</dd>
           <dt>Výhody</dt><dd>Jasný vítěz a přímá vazba mezi voliči a jejich zástupcem v obvodu.</dd>
           <dt>Nevýhody</dt><dd>Hlasy pro poražené kandidáty propadnou a malé strany mají jen malou šanci.</dd>
         </dl></div>
