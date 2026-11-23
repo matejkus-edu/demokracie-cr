@@ -78,6 +78,7 @@ window.HARMONOGRAM = {
         {
           k: "E2", t: "Kampaň a volby (cesta voliče a volby)",
           ukoly: [
+            { kde: "hodina", t: "Příprava na povolební vyjednávání: předem si zvolíte, kdo bude zastávat jakou funkci, pokud budete ve vládě (premiér, ministři) a pokud budete v opozici (lídr opozice, stínoví ministři), a kdo bude předsedou klubu, řečníkem a senátorem. Pak projdete programy ostatních stran ze své třídy a sepíšete, s čím se zásadně neshodnete, s čím se víceméně shodnete a s kým byste do koalice jít mohli a s kým ne.", odkaz: ["#strany", "Strany"] },
             { kde: "hodina", t: "Deník, zápis 2.", denik: 2, vahaZak: 15 },
             { kde: "doma", t: "Každý individuálně projde profily a kampaně stran z paralelní třídy a vyplní hodnoticí arch kampaní.", od: "2026-12-06T23:59", termin: "2026-12-12T14:00", kratce: "Hodnoticí arch kampaní", odkaz: ["#strany", "Strany"] },
             { kde: "doma", t: "Každý individuálně vyplní volební kalkulačku jako volič.", od: "2026-12-06T23:59", termin: "2026-12-12T14:00", kratce: "Kalkulačka jako volič", odkaz: ["#kalkulacka-volic", "Kalkulačka"] },
@@ -95,6 +96,7 @@ window.HARMONOGRAM = {
           k: "E3", t: "Sestavení vlády a opozice",
           ukoly: [
             { kde: "doma", t: "Po zveřejnění výsledků voleb si strany přepočítají mandáty a mohou začít neformálně vyjednávat o koalici.", od: "2026-12-12T14:00", volitelne: true },
+            { kde: "hodina", t: "Strany potvrdí funkce, které si rozdělily v přípravě na povolební vyjednávání." },
             { kde: "hodina", t: "Koaliční strany podepíší koaliční smlouvu (aspoň 101 mandátů, premiér nebo premiérka, ministerstva) a zvolí společné programové priority a vlajkový zákon, který vláda předloží." },
             { kde: "hodina", t: "Opoziční strany sestaví stínovou vládu a připraví pozměňovací návrhy." },
             { kde: "hodina", t: "Sněmovna hlasuje o důvěře vládě." }
