@@ -811,4 +811,35 @@
   }
 
   document.addEventListener("DOMContentLoaded", route);
+
+  /* Hlídání nové verze webu. Stránka se při přepínání záložek znovu nenačítá, takže v kartě
+     otevřené před aktualizací by běžel starý kód. Jednou za pár minut (a při návratu na kartu)
+     se zjistí číslo verze v index.html; když se liší, nahoře se objeví lišta s obnovením. */
+  (function hlidatVerzi() {
+    const m = (document.querySelector('script[src*="assets/app.js"]') || {}).src;
+    const moje = m && (m.match(/[?&]v=([\w.-]+)/) || [])[1];
+    if (!moje) return;
+    let posledni = 0, ukazano = false;
+    async function zkontroluj() {
+      if (ukazano || Date.now() - posledni < 60000) return;
+      posledni = Date.now();
+      try {
+        const r = await fetch("index.html?nv=" + Date.now(), { cache: "no-store" });
+        if (!r.ok) return;
+        const t = await r.text(), nova = (t.match(/assets\/app\.js\?v=([\w.-]+)/) || [])[1];
+        if (nova && nova !== moje) ukaz();
+      } catch (e) { /* bez sítě nic */ }
+    }
+    function ukaz() {
+      ukazano = true;
+      const el = document.createElement("div");
+      el.className = "nova-verze"; el.setAttribute("role", "status");
+      el.innerHTML = '<span>Web byl mezitím aktualizován.</span> <button type="button">Načíst novou verzi</button>';
+      el.querySelector("button").addEventListener("click", () => location.reload());
+      document.body.appendChild(el);
+    }
+    setInterval(zkontroluj, 5 * 60000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) zkontroluj(); });
+    window.addEventListener("hashchange", zkontroluj);
+  })();
 })();
