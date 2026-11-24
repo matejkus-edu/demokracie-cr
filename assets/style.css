@@ -621,6 +621,19 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .k-predseda { margin-top: 14px; }
 .k-predseda select { font: inherit; font-family: var(--sans); font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); min-width: 240px; }
 .uk-wrap { max-width: 980px; }
+.upr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; }
+.upr-karta { background: var(--surface); border: 1px solid var(--hair); border-top: 5px solid var(--pc); border-radius: 14px; padding: 16px 18px; }
+.upr-karta header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: start; margin-bottom: 8px; }
+.upr-karta h2 { font-size: 20px; margin: 0; }
+.upr-karta header p { grid-column: 1; margin: 0; font-family: var(--sans); font-size: 13.5px; }
+.upr-karta header .btn { grid-column: 2; grid-row: 1 / span 2; }
+.upr-tab { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.upr-tab th, .upr-tab td { text-align: left; vertical-align: top; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--hair); }
+.upr-tab tbody th { font-weight: 400; width: 52%; }
+.upr-tab td { font-family: var(--sans); font-size: 13.5px; }
+.upr-sk th { font-family: var(--sans); font-size: 12.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding-top: 12px; }
+.upr-clenove { display: flex; flex-wrap: wrap; gap: 4px 14px; font-family: var(--sans); font-size: 13.5px; margin: 10px 0 0; }
+@media (max-width: 520px) { .upr-grid { grid-template-columns: minmax(0, 1fr); } .upr-tab tbody th { width: auto; } }
 .uk-h { font-family: var(--sans); font-size: 15px; font-weight: 700; margin: 22px 0 6px; }
 .uk-vaha { display: block; font-family: var(--sans); font-size: 12.5px; font-weight: 700; color: var(--jud); margin-top: 2px; }
 .uk-vsichni { font-family: var(--sans); font-size: 14px; padding-top: 3px; }

@@ -390,6 +390,7 @@
       </div></div>
       <nav class="subnav" aria-label="Učitelský panel">
         <a href="#ucitel" aria-current="page">Žáci a strany</a>
+        <a href="#ukoly">Rozdělení úkolů</a>
         <a href="#deniky">Odevzdané deníky</a>
         <a href="#deniky-otazky">Otázky a termíny</a>
         <button type="button" class="subnav-out" data-odhlasit>Odhlásit se</button>

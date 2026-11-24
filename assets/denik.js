@@ -264,6 +264,7 @@
   function ucitelHlava(aktivni) {
     return `<nav class="subnav" aria-label="Učitelský panel">
       <a href="#ucitel"${aktivni === "ucitel" ? ' aria-current="page"' : ""}>Žáci a strany</a>
+      <a href="#ukoly">Rozdělení úkolů</a>
       <a href="#deniky"${aktivni === "prehled" ? ' aria-current="page"' : ""}>Odevzdané deníky</a>
       <a href="#deniky-otazky"${aktivni === "otazky" ? ' aria-current="page"' : ""}>Otázky a termíny</a>
       <button type="button" class="subnav-out" data-odhlasit>Odhlásit se</button>

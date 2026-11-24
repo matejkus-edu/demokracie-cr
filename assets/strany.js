@@ -675,8 +675,9 @@
   async function renderUkoly(arg) {
     clearInterval(ed.timer);
     if (!(await pripravit("Rozdělení úkolů"))) return;
+    if (jeUcitel() && !arg) return prehledUkolu();
     const id = arg && jeUcitel() ? arg : mojeStrana();
-    if (!id) return hlaska("Rozdělení úkolů", jeUcitel() ? 'Vyberte stranu v <a class="inl" href="#ucitel">učitelském panelu</a> nebo na stránce <a class="inl" href="#strany">Strany</a>.' : "Do strany tě učitel zařadí v hodině 23. 11. Pak si tu úkoly rozdělíte.");
+    if (!id) return hlaska("Rozdělení úkolů", "Do strany tě učitel zařadí v hodině. Pak si tu úkoly rozdělíte.");
     const s = najdi(id);
     if (!s) return hlaska("Rozdělení úkolů", "Strana nenalezena.");
     ed.id = id; ed.dirty.clear();
@@ -684,12 +685,52 @@
     ed.timer = setInterval(obnov, 20000);
   }
 
+  /* Učitel: přehled rozdělení úkolů všech stran jedné třídy (podklad k hodnocení plnění úkolů). */
+  let tridaUkoly = null;
+  function prehledUkolu() {
+    const T = tridaUkoly || A().store.get("trida") || "L1B";
+    const strany = st.strany.filter((x) => x.trida === T);
+    const jmena = (ids, cl) => ids.map((id) => (cl.find((c) => c.id === id) || {}).jmeno).filter(Boolean);
+    const karta = (s) => {
+      const cl = clenove(s), u = s.p.ukoly || {}, kon = kontrolaUkolu(s);
+      const pred = cl.find((c) => c.id === s.p.predseda);
+      const radek = (x) => { const j = jmena(u[x.k] || [], cl);
+        return `<tr><th scope="row">${esc(x.t)}<span class="uk-vaha">${x.vaha ? x.vaha + " hodnocení strany" : "povinný úkol"}</span></th><td>${j.length ? esc(j.join(", ")) : '<span class="c-bad">bez jména</span>'}</td></tr>`; };
+      return `<section class="upr-karta" style="--pc:${esc(s.p.barva || "#6B7689")}">
+        <header><h2>${esc(s.nazev)}</h2><p class="muted">${cl.length} ${cl.length === 1 ? "člen" : cl.length >= 2 && cl.length <= 4 ? "členové" : "členů"} · předseda/předsedkyně: ${pred ? esc(pred.jmeno) : '<span class="c-bad">nezvolen</span>'}</p>
+          <a class="btn small ghost" href="#ukoly-${s.id}">Upravit</a></header>
+        ${cl.length ? `<table class="upr-tab">
+          <tbody><tr class="upr-sk"><th colspan="2">V hodině E1</th></tr>${UKOLY.filter((x) => x.kde === "hodina").map(radek).join("")}
+          <tr class="upr-sk"><th colspan="2">Doma</th></tr>${UKOLY.filter((x) => x.kde === "doma").map(radek).join("")}</tbody></table>
+        <p class="upr-clenove">${cl.map((c) => `<span>${esc(c.jmeno)} <b class="${kon.pocty[c.id].hodina && kon.pocty[c.id].doma ? "" : "c-bad"}">${kon.pocty[c.id].hodina} + ${kon.pocty[c.id].doma}</b></span>`).join("")}</p>
+        ${kon.chyby.length ? `<ul class="uk-chyby">${kon.chyby.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : '<p class="uk-ok">Rozdělení splňuje pravidla.</p>'}` : '<p class="muted">Strana zatím nemá členy.</p>'}
+      </section>`;
+    };
+    A().main.innerHTML = `
+    <div class="wrap">
+      <div class="page-head"><div>
+        <h1>Rozdělení úkolů</h1>
+        <p class="lead">Jak si strany rozdělily úkoly před volbami. U členů je počet úkolů v hodině + doma.</p>
+      </div></div>
+      <nav class="subnav" aria-label="Učitelský panel">
+        <a href="#ucitel">Žáci a strany</a>
+        <a href="#ukoly" aria-current="page">Rozdělení úkolů</a>
+        <a href="#deniky">Odevzdané deníky</a>
+        <a href="#deniky-otazky">Otázky a termíny</a>
+        <button type="button" class="subnav-out" data-odhlasit>Odhlásit se</button>
+      </nav>
+      <div class="toolbar"><div class="seg" id="u-trida">${TRIDY.map((t) => `<button type="button" data-t="${t}" aria-pressed="${t === T}">${t}</button>`).join("")}</div></div>
+      ${strany.length ? `<div class="upr-grid">${strany.map(karta).join("")}</div>` : `<p class="muted">Třída ${T} zatím nemá strany.</p>`}
+    </div>`;
+    A().main.querySelectorAll("#u-trida button").forEach((b) => b.addEventListener("click", () => { tridaUkoly = b.dataset.t; A().store.set("trida", b.dataset.t); prehledUkolu(); }));
+  }
+
   function kresliUkoly(s) {
     const lze = muzeUpravovat(s), dis = lze ? "" : " disabled", cl = clenove(s);
     const y = window.scrollY;
     A().main.innerHTML = `
     <div class="wrap uk-wrap">
-      <p class="crumb"><a class="inl" href="#strana${jeUcitel() ? "-" + s.id : ""}">Profil strany</a> · <a class="inl" href="#strany-${s.id}">Zobrazit profil</a></p>
+      <p class="crumb">${jeUcitel() ? '<a class="inl" href="#ukoly">Přehled všech stran</a> · ' : ""}<a class="inl" href="#strana${jeUcitel() ? "-" + s.id : ""}">Profil strany</a> · <a class="inl" href="#strany-${s.id}">Zobrazit profil</a></p>
       <div class="page-head"><div>
         <h1>Rozdělení úkolů</h1>
         <p class="lead">${esc(s.nazev)}. Rozdělení vidí jen vaše strana a učitel. Ukládá se samo.</p>
