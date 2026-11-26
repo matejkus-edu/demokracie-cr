@@ -41,7 +41,7 @@ window.HARMONOGRAM = {
             { kde: "hodina", t: "Na základě vylosované pozice upřesníte ideologické ukotvení strany na dvou osách.", vaha: 10 },
             { kde: "hodina", t: "Začnete 3 programové priority a vlajkový zákon. Dokončíte je v příští hodině." },
             { kde: "doma", t: "Rozdělíte si úkoly ze seznamu, u každého úkolu jméno. Rozdělení zapíšete na web a učitel ho zkontroluje.", termin: "2026-11-29T23:59", kratce: "Rozdělení úkolů", odkaz: ["#ukoly", "Rozdělení úkolů"] },
-            { kde: "doma", t: "Začnete vyplňovat profil strany: název a texty profilu, logo, kandidátní listina.", termin: "2026-11-29T23:59", odkaz: ["#strana", "Profil strany"] }
+            { kde: "doma", t: "Začnete vyplňovat profil strany: název a texty profilu, logo, kandidátní listina (pořadí a u každého kandidáta krátký popis).", termin: "2026-11-29T23:59", odkaz: ["#strana", "Profil strany"] }
           ]
         }
       ]
@@ -64,7 +64,7 @@ window.HARMONOGRAM = {
           ukoly: [
             { kde: "hodina", t: "Odpovědi do kalkulačky: odpovíte za stranu na všech 14 výroků i se zdůvodněním (nejvýš 3 neutrální odpovědi). Co nestihnete v hodině, dokončíte doma. Po uzávěrce se odpovědi uzamknou.", vaha: 20, termin: "2026-12-06T23:59", kratce: "Odpovědi strany do kalkulačky", odkaz: ["#kalkulacka-strana", "Odpovědi do kalkulačky"] },
             { kde: "hodina", t: "Deník, zápis 1: jeden zápis za obě hodiny (zakládání strany i kalkulačka za stranu). Co nestihnete, dopíšete doma.", denik: 1, vahaZak: 15, termin: "2026-12-06T23:59", kratce: "Deník, zápis 1" },
-            { kde: "doma", t: "Profil strany na webu: vyplníte všechny povinné součásti (název a texty profilu, logo, bod na osách, 3 programové priority, vlajkový zákon, kandidátní listina, předseda a rozdělení úkolů). Pozici, priority a vlajkový zákon přepíšete z papíru z hodiny. Úkoly na doma plní ten, komu připadly při rozdělení.", termin: "2026-12-06T23:59", kratce: "Profil strany na webu", odkaz: ["#strana", "Profil strany"] },
+            { kde: "doma", t: "Profil strany na webu: vyplníte všechny povinné součásti (název a texty profilu, logo, bod na osách, 3 programové priority, vlajkový zákon, kandidátní listina s krátkým popisem každého kandidáta, předseda a rozdělení úkolů). Pozici, priority a vlajkový zákon přepíšete z papíru z hodiny. Úkoly na doma plní ten, komu připadly při rozdělení.", termin: "2026-12-06T23:59", kratce: "Profil strany na webu", odkaz: ["#strana", "Profil strany"] },
             { kde: "doma", t: "Kampaň: povinně plakát, volitelně volební spot (do 2 min), který může hodnocení výrazně zlepšit. Obojí nahrajete do profilu strany.", vaha: 20, termin: "2026-12-06T23:59", kratce: "Plakát (a volitelně spot)", odkaz: ["#strana", "Profil strany"] }
           ]
         }

@@ -151,8 +151,8 @@
     const lid = st.zaci.filter((z) => z.strana_id === s.id);
     const k = Array.isArray(s.p.kandidatka) ? s.p.kandidatka : [];
     const out = [];
-    k.forEach((r) => { const z = lid.find((x) => x.id === r.id); if (z && !out.find((x) => x.id === z.id)) out.push({ id: z.id, jmeno: z.jmeno }); });
-    lid.forEach((z) => { if (!out.find((x) => x.id === z.id)) out.push({ id: z.id, jmeno: z.jmeno }); });
+    k.forEach((r) => { const z = lid.find((x) => x.id === r.id); if (z && !out.find((x) => x.id === z.id)) out.push({ id: z.id, jmeno: z.jmeno, popis: r.popis || "" }); });
+    lid.forEach((z) => { if (!out.find((x) => x.id === z.id)) out.push({ id: z.id, jmeno: z.jmeno, popis: "" }); });
     return out;
   }
 
@@ -164,7 +164,7 @@
       ["Pozice na osách", p.osa_lp != null && p.osa_lk != null && !!(p.osy_zduvodneni || "").trim()],
       ["3 priority", [1, 2, 3].every((i) => p["p" + i] && p["p" + i + "_karta"] && p["p" + i + "_smer_volba"] && (p["p" + i + "_smer"] || "").trim() && p["p" + i + "_popis"] && (p["p" + i + "_proc"] || "").trim()) && oblastiPriorit(p).ruzne],
       ["Vlajkový zákon", !!(p.zakon_nazev && p.zakon_problem && p.zakon_reseni && p.zakon_koho && p.zakon_naklady && p.zakon_typ)],
-      ["Kandidátní listina a předseda", cl.length > 0 && cl.some((c) => c.id === p.predseda)],
+      ["Kandidátní listina, popisy a předseda", cl.length > 0 && cl.some((c) => c.id === p.predseda) && cl.every((c) => (c.popis || "").trim())],
       ["Rozdělení úkolů", kontrolaUkolu(s).ok],
       ["Plakát", !!p.plakat_path],
       ["Odpovědi do kalkulačky", kalkHotovo(s.id)]
@@ -337,7 +337,7 @@
             ${p.spot_url ? `<p><a class="btn ghost spot" href="${esc(p.spot_url)}" target="_blank" rel="noopener">Pustit volební spot</a></p>` : ""}
           </section>
           <section class="pd-sec"><h2>Kandidátní listina</h2>
-            ${cl.length ? `<ol class="kandidatka">${cl.map((c) => `<li><span class="kn">${esc(c.jmeno)}</span>${c.id === p.predseda ? `<span class="kr">${PREDSEDA}</span>` : ""}</li>`).join("")}</ol>` : '<p class="muted">Strana zatím nemá členy.</p>'}
+            ${cl.length ? `<ol class="kandidatka">${cl.map((c) => `<li><span class="kn">${esc(c.jmeno)}</span>${c.popis ? `<span class="kp">, ${esc(c.popis)}</span>` : ""}${c.id === p.predseda ? `<span class="kr">${PREDSEDA}</span>` : ""}</li>`).join("")}</ol>` : '<p class="muted">Strana zatím nemá členy.</p>'}
           </section>
           ${jeUcitel() ? `<section class="pd-sec"><h2>Historie úprav</h2><div id="historie"><p class="muted">Načítám…</p></div></section>` : ""}
         </aside>
@@ -460,10 +460,12 @@
           </section>
 
           <section class="ed-sec" id="sec-kandidatka"><h2>Kandidátní listina a předseda</h2>
-            <p class="hint">Kandidátní listina je jen pořadí kandidátů: když strana získá mandáty, dostanou je kandidáti odshora. Funkce ve Sněmovně a ve vládě se obsazují až po volbách.</p>
+            <p class="hint">Kandidátní listina je pořadí kandidátů: když strana získá mandáty, dostanou je kandidáti odshora. Funkce ve Sněmovně a ve vládě se obsazují až po volbách.</p>
+            <p class="hint">U skutečných kandidátek bývá za jménem krátký popis (povolání, čím se kandidát zabývá). Každý si napište svůj: zájmy nebo cokoli, čím se chcete voličům představit. Musí to být pravdivé a bez nevhodného obsahu. Nepište kontakty ani nic, co nechcete, aby četla paralelní třída.</p>
             ${cl.length ? `<ol class="k-edit" id="k-edit">${cl.map((c, i) => `<li data-id="${c.id}">
               <span class="k-n">${i + 1}.</span><span class="k-j">${esc(c.jmeno)}${c.id === p.predseda ? ` <span class="k-pred">${PREDSEDA}</span>` : ""}</span>
               <span class="k-move"><button type="button" class="mini" data-up="${i}" aria-label="Posunout výš"${i === 0 || !lze ? " disabled" : ""}>↑</button><button type="button" class="mini" data-down="${i}" aria-label="Posunout níž"${i === cl.length - 1 || !lze ? " disabled" : ""}>↓</button></span>
+              <input class="k-popis" type="text" data-kid="${c.id}" maxlength="120" value="${esc(c.popis || "")}" placeholder="např. hraje na kytaru, zajímá se o klima" aria-label="Krátký popis: ${esc(c.jmeno)}"${dis}>
             </li>`).join("")}</ol>
             <div class="fld k-predseda"><label for="f-predseda">Předseda/předsedkyně strany</label>
               <select id="f-predseda" data-predseda${dis}><option value="">Vyberte…</option>${cl.map((c) => `<option value="${c.id}"${c.id === p.predseda ? " selected" : ""}>${esc(c.jmeno)}</option>`).join("")}</select>
@@ -590,7 +592,16 @@
     }));
 
     // kandidátní listina
-    const kList = () => Array.from(root.querySelectorAll("#k-edit li")).map((li) => ({ id: li.dataset.id }));
+    const kList = () => Array.from(root.querySelectorAll("#k-edit li")).map((li) => {
+      const v = (li.querySelector(".k-popis") || {}).value;
+      return v && v.trim() ? { id: li.dataset.id, popis: v.trim().slice(0, 120) } : { id: li.dataset.id };
+    });
+    let kPopisTimer = null;
+    root.querySelectorAll(".k-popis").forEach((el) => el.addEventListener("input", () => {
+      ed.dirty.add("kandidatka");
+      clearTimeout(kPopisTimer);
+      kPopisTimer = setTimeout(() => ulozSloupec(s, "kandidatka", kList()), 900);
+    }));
     const pred = root.querySelector("[data-predseda]");
     if (pred) pred.addEventListener("change", async () => {
       // spolu s předsedou se uloží i aktuální pořadí kandidátky

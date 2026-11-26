@@ -554,6 +554,7 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .kandidatka li { padding: 6px 0; border-bottom: 1px solid var(--hair); }
 .kandidatka li::marker { font-weight: 700; color: var(--muted); }
 .kn { font-weight: 700; }
+.kp { color: var(--muted); }
 .kr { display: block; font-family: var(--sans); font-size: 13px; color: var(--muted); }
 .hist { list-style: none; padding: 0; margin: 0; font-family: var(--sans); font-size: 13.5px; line-height: 1.5; }
 .hist li { padding: 6px 0; border-bottom: 1px solid var(--hair); }
@@ -655,6 +656,7 @@ svg.kompas { display: block; width: 100%; height: auto; font-family: var(--sans)
 .k-edit li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; border-top: 1px solid var(--hair); padding: 10px 0; }
 .k-n { font-weight: 900; color: var(--muted); }
 .k-j { font-weight: 700; }
+.k-popis { grid-column: 2 / -1; font: inherit; font-size: 15px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); width: 100%; }
 .k-move { display: flex; gap: 4px; }
 .k-move .mini:disabled { opacity: .3; cursor: default; }
 .nova-verze { position: fixed; top: 0; left: 0; right: 0; z-index: 60; display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; align-items: center; background: var(--ink); color: var(--paper); font-family: var(--sans); font-size: 14.5px; font-weight: 600; padding: 9px 16px; box-shadow: var(--shadow); }
