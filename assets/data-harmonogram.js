@@ -48,8 +48,8 @@ window.HARMONOGRAM = {
     },
     {
       t: "Dokončení programu a kalkulačka za stranu",
-      hodiny: { L1C: ["2026-11-30"], L1B: ["2026-12-01"] },
-      pozn: { L1C: "Hodina 30. 11. je suplovaná." },
+      hodiny: { L1C: ["2026-12-01", "2026-12-02"], L1B: ["2026-12-01"] },
+      pozn: { L1C: "Pondělní dvouhodinovka 30. 11. se přesouvá a dělí na dvě hodiny: první v úterý 1. 12., druhá ve středu 2. 12." },
       epizody: [
         {
           k: "E1", t: "Založení politických stran a tvorba programu (dokončení programu)",
